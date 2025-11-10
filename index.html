@@ -13,12 +13,20 @@
     }
     h1 {
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
+    }
+    #searchBar {
+        width: 100%;
+        padding: 8px 12px;
+        margin-bottom: 15px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
     }
     table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 20px;
+        margin-top: 10px;
     }
     th, td {
         padding: 8px 12px;
@@ -101,6 +109,8 @@
 </head>
 <body>
 <h1>PC GAME List</h1>
+
+<input type="text" id="searchBar" placeholder="Search games...">
 
 <div class="total">Total Size: <span id="totalSize">0 / 450 GB</span></div>
 
@@ -372,42 +382,51 @@ const selectedGamesList = document.getElementById("selectedGamesList");
 const selectedGamesDiv = document.getElementById("selectedGamesDiv");
 const toggleButton = document.getElementById("toggleList");
 const clearAllBtn = document.getElementById("clearAllBtn");
+const searchBar = document.getElementById("searchBar");
 const totalLimit = 450;
 
 let selectedGames = [];
 
 // Create table rows dynamically
-games.forEach((game, index) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-        <td><input type="checkbox" onchange="toggleGame(${index}, this)"></td>
-        <td>${game.title}</td>
-        <td>${game.size} GB</td>
-    `;
-    tableBody.appendChild(row);
-});
+function renderTable(filter = "") {
+    tableBody.innerHTML = "";
+    games.forEach((game, index) => {
+        if (game.title.toLowerCase().includes(filter.toLowerCase())) {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td><input type="checkbox" onchange="toggleGame(${index}, this)" ${selectedGames.includes(index) ? "checked" : ""}></td>
+                <td>${game.title}</td>
+                <td>${game.size} GB</td>
+            `;
+            tableBody.appendChild(row);
+        }
+    });
+    updateSelectedGames();
+}
 
+// Checkbox toggle
 function toggleGame(index, checkbox) {
     if (checkbox.checked) {
-        selectedGames.push(index);
+        if (!selectedGames.includes(index)) selectedGames.push(index);
     } else {
         selectedGames = selectedGames.filter(i => i !== index);
     }
     updateSelectedGames();
 }
 
+// Remove a single game
 function removeGame(index) {
     selectedGames = selectedGames.filter(i => i !== index);
-    tableBody.querySelectorAll("input[type='checkbox']")[index].checked = false;
-    updateSelectedGames();
+    renderTable(searchBar.value);
 }
 
+// Clear all selections
 function clearAllGames() {
     selectedGames = [];
-    tableBody.querySelectorAll("input[type='checkbox']").forEach(cb => cb.checked = false);
-    updateSelectedGames();
+    renderTable(searchBar.value);
 }
 
+// Update selected games list and total size
 function updateSelectedGames() {
     let total = 0;
     selectedGamesList.innerHTML = "";
@@ -450,7 +469,7 @@ function updateSelectedGames() {
     // Disable unchecked checkboxes if limit reached
     const checkboxes = tableBody.querySelectorAll("input[type='checkbox']");
     if (total >= totalLimit) {
-        checkboxes.forEach((cb, i) => {
+        checkboxes.forEach((cb) => {
             if (!cb.checked) cb.disabled = true;
         });
     } else {
@@ -458,7 +477,7 @@ function updateSelectedGames() {
     }
 }
 
-// Toggle the selected games list
+// Toggle selected games list
 toggleButton.addEventListener("click", () => {
     if (selectedGamesDiv.style.display === "none") {
         selectedGamesDiv.style.display = "block";
@@ -469,12 +488,16 @@ toggleButton.addEventListener("click", () => {
     }
 });
 
-// Clear All button
+// Clear all button
 clearAllBtn.addEventListener("click", clearAllGames);
 
-// Initial state
-selectedGamesDiv.style.display = "none";
-clearAllBtn.style.display = "none";
+// Search functionality
+searchBar.addEventListener("input", () => {
+    renderTable(searchBar.value);
+});
+
+// Initial render
+renderTable();
 </script>
 </body>
 </html>
