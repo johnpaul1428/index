@@ -54,16 +54,15 @@
         text-align: center;
         margin-bottom: 10px;
     }
-    /* Sticky Selected Games container */
     .selectedGames {
         position: sticky;
-        top: 130px; /* Adjust based on height of total + counter */
+        top: 130px;
         margin-top: 10px;
         padding: 10px;
         border: 2px solid #000;
         border-radius: 10px;
         background-color: #f2f2f2;
-        display: none; /* Hidden by default */
+        display: none;
         z-index: 98;
     }
     .selectedGames ul {
@@ -89,37 +88,33 @@
         padding: 2px 6px;
     }
     .clearAllBtn {
-        background-color: red; /* Always red */
+        background-color: red;
         color: #fff;
         border: none;
         border-radius: 5px;
         cursor: pointer;
         padding: 5px 10px;
         margin-top: 5px;
-        display: none; /* Hidden by default */
+        display: none;
     }
 </style>
 </head>
 <body>
 <h1>PC GAME List</h1>
 
-<!-- Total size box -->
 <div class="total">Total Size: <span id="totalSize">0 / 450 GB</span></div>
 
-<!-- Games Added Counter -->
 <div class="counter">
     Games Added: <span id="gameCount">0</span>
     <button id="toggleList" style="margin-left: 10px;">Show Selected Games</button>
 </div>
 
-<!-- Selected Games List -->
 <div class="selectedGames" id="selectedGamesDiv">
     <strong>Selected Games:</strong>
     <ul id="selectedGamesList"></ul>
     <button class="clearAllBtn" id="clearAllBtn">Clear All</button>
 </div>
 
-<!-- Game table -->
 <table>
     <thead>
         <tr>
@@ -377,9 +372,10 @@ const selectedGamesList = document.getElementById("selectedGamesList");
 const selectedGamesDiv = document.getElementById("selectedGamesDiv");
 const toggleButton = document.getElementById("toggleList");
 const clearAllBtn = document.getElementById("clearAllBtn");
-const totalLimit = 450; // 450GB limit
+const totalLimit = 450;
 
 let selectedGames = [];
+let currentTotal = 0;
 
 // Create table rows dynamically
 games.forEach((game, index) => {
@@ -393,43 +389,49 @@ games.forEach((game, index) => {
 });
 
 function toggleGame(index, checkbox) {
+    const gameSize = games[index].size;
     if (checkbox.checked) {
+        if (currentTotal + gameSize > totalLimit) {
+            alert("Cannot select this game. Total size would exceed 450GB!");
+            checkbox.checked = false;
+            return;
+        }
         selectedGames.push(index);
+        currentTotal += gameSize;
     } else {
         selectedGames = selectedGames.filter(i => i !== index);
+        currentTotal -= gameSize;
     }
     updateSelectedGames();
 }
 
 function removeGame(index) {
+    const gameSize = games[index].size;
     selectedGames = selectedGames.filter(i => i !== index);
     tableBody.querySelectorAll("input[type='checkbox']")[index].checked = false;
+    currentTotal -= gameSize;
     updateSelectedGames();
 }
 
 function clearAllGames() {
     selectedGames = [];
     tableBody.querySelectorAll("input[type='checkbox']").forEach(cb => cb.checked = false);
+    currentTotal = 0;
     updateSelectedGames();
 }
 
 function updateSelectedGames() {
-    let total = 0;
     selectedGamesList.innerHTML = "";
-
     clearAllBtn.style.display = selectedGames.length > 0 ? "inline-block" : "none";
 
     selectedGames.forEach(i => {
-        total += games[i].size;
         const li = document.createElement("li");
         li.innerHTML = `📌 ${games[i].title}`;
-
         const removeBtn = document.createElement("button");
         removeBtn.textContent = "Remove";
         removeBtn.className = "removeBtn";
         removeBtn.onclick = () => removeGame(i);
         li.appendChild(removeBtn);
-
         selectedGamesList.appendChild(li);
     });
 
@@ -437,16 +439,15 @@ function updateSelectedGames() {
 
     const totalDivs = document.querySelectorAll(".total");
     totalDivs.forEach(div => {
-        if (total > totalLimit) {
+        div.innerHTML = `Total Size: ${currentTotal.toFixed(2)} / ${totalLimit} GB`;
+        if (currentTotal > totalLimit) {
             div.style.backgroundColor = "#ffcccc";
             div.style.borderColor = "red";
             div.style.color = "red";
-            div.innerHTML = `⚠️ Over the 450GB limit!<br>Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
         } else {
             div.style.backgroundColor = "#fff";
             div.style.borderColor = "#000";
             div.style.color = "#000";
-            div.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
         }
     });
 }
