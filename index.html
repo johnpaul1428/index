@@ -373,7 +373,7 @@ function updateTotal() {
             total += games[i].size;
             selectedCount++;
             const li = document.createElement("li");
-            li.textContent = games[i].title;
+            li.textContent = `• ${games[i].title}`; // Added bullet here
             selectedGamesList.appendChild(li);
         }
     });
