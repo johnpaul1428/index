@@ -67,10 +67,36 @@
         z-index: 98;
     }
     .selectedGames ul {
-        margin: 5px 0 0 20px;
+        margin: 5px 0 0 0;
         padding: 0;
         max-height: 300px;
         overflow-y: auto;
+        list-style-type: none;
+    }
+    .selectedGames li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 0;
+    }
+    .selectedGames button.removeBtn {
+        margin-left: 10px;
+        background-color: red;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        padding: 2px 6px;
+    }
+    .clearAllBtn {
+        background-color: red; /* Always red */
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        padding: 5px 10px;
+        margin-top: 5px;
+        display: none; /* Hidden by default */
     }
 </style>
 </head>
@@ -90,6 +116,7 @@
 <div class="selectedGames" id="selectedGamesDiv">
     <strong>Selected Games:</strong>
     <ul id="selectedGamesList"></ul>
+    <button class="clearAllBtn" id="clearAllBtn">Clear All</button>
 </div>
 
 <!-- Game table -->
@@ -349,39 +376,65 @@ const gameCount = document.getElementById("gameCount");
 const selectedGamesList = document.getElementById("selectedGamesList");
 const selectedGamesDiv = document.getElementById("selectedGamesDiv");
 const toggleButton = document.getElementById("toggleList");
+const clearAllBtn = document.getElementById("clearAllBtn");
 const totalLimit = 450; // 450GB limit
+
+let selectedGames = [];
 
 // Create table rows dynamically
 games.forEach((game, index) => {
     const row = document.createElement("tr");
     row.innerHTML = `
-        <td><input type="checkbox" onchange="updateTotal()"></td>
+        <td><input type="checkbox" onchange="toggleGame(${index}, this)"></td>
         <td>${game.title}</td>
         <td>${game.size} GB</td>
     `;
     tableBody.appendChild(row);
 });
 
-function updateTotal() {
-    let total = 0;
-    let selectedCount = 0;
-    const checkboxes = tableBody.querySelectorAll("input[type='checkbox']");
-    selectedGamesList.innerHTML = ""; // Clear current list
+function toggleGame(index, checkbox) {
+    if (checkbox.checked) {
+        selectedGames.push(index);
+    } else {
+        selectedGames = selectedGames.filter(i => i !== index);
+    }
+    updateSelectedGames();
+}
 
-    checkboxes.forEach((cb, i) => {
-        if (cb.checked) {
-            total += games[i].size;
-            selectedCount++;
-            const li = document.createElement("li");
-            li.textContent = `• ${games[i].title}`; // Added bullet here
-            selectedGamesList.appendChild(li);
-        }
+function removeGame(index) {
+    selectedGames = selectedGames.filter(i => i !== index);
+    tableBody.querySelectorAll("input[type='checkbox']")[index].checked = false;
+    updateSelectedGames();
+}
+
+function clearAllGames() {
+    selectedGames = [];
+    tableBody.querySelectorAll("input[type='checkbox']").forEach(cb => cb.checked = false);
+    updateSelectedGames();
+}
+
+function updateSelectedGames() {
+    let total = 0;
+    selectedGamesList.innerHTML = "";
+
+    clearAllBtn.style.display = selectedGames.length > 0 ? "inline-block" : "none";
+
+    selectedGames.forEach(i => {
+        total += games[i].size;
+        const li = document.createElement("li");
+        li.innerHTML = `📌 ${games[i].title}`;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "Remove";
+        removeBtn.className = "removeBtn";
+        removeBtn.onclick = () => removeGame(i);
+        li.appendChild(removeBtn);
+
+        selectedGamesList.appendChild(li);
     });
 
-    // Update counter
-    gameCount.textContent = selectedCount;
+    gameCount.textContent = selectedGames.length;
 
-    // Update total size box
     const totalDivs = document.querySelectorAll(".total");
     totalDivs.forEach(div => {
         if (total > totalLimit) {
@@ -409,8 +462,12 @@ toggleButton.addEventListener("click", () => {
     }
 });
 
-// Set initial display
+// Clear All button
+clearAllBtn.addEventListener("click", clearAllGames);
+
+// Initial state
 selectedGamesDiv.style.display = "none";
+clearAllBtn.style.display = "none";
 </script>
 </body>
 </html>
