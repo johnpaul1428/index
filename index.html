@@ -5,204 +5,245 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PC GAME List</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #ffffff;
-        color: #000000;
+    /* ===== Base Styles ===== */
+    * {
+        box-sizing: border-box;
         margin: 0;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
+        padding: 0;
     }
 
-    /* ===== Fixed Solid Header ===== */
-    .header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background-color: #fff;
-        border-bottom: 3px solid #000;
-        z-index: 1000;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f7f7f7;
+        color: #333;
+        line-height: 1.5;
+        padding: 0;
     }
 
-    .header-section {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 10px;
-    }
-
-    .header h1 {
-        margin: 5px 0;
-        font-size: 24px;
+    /* ===== Header ===== */
+    h1 {
         text-align: center;
+        padding: 20px 10px;
+        background: #1f2937;
+        color: #fff;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+
+    /* ===== Search Bar ===== */
+    #searchContainer {
+        display: flex;
+        justify-content: center;
+        padding: 15px 10px;
+        background: #fff;
+        position: sticky;
+        top: 70px;
+        z-index: 99;
+        border-bottom: 1px solid #ddd;
     }
 
     #searchBar {
-        width: 60%;
-        padding: 10px;
+        width: 100%;
+        max-width: 600px;
+        padding: 12px 15px;
         font-size: 16px;
-        border: 2px solid #000;
+        border: 1px solid #ccc;
         border-radius: 8px;
-        margin: 10px 0;
+        transition: border 0.3s;
     }
 
-    .header-info {
+    #searchBar:focus {
+        outline: none;
+        border-color: #1f2937;
+        box-shadow: 0 0 5px rgba(31, 41, 55, 0.3);
+    }
+
+    /* ===== Info Boxes ===== */
+    .info-container {
         display: flex;
-        justify-content: center;
         flex-wrap: wrap;
+        justify-content: center;
         gap: 15px;
-        text-align: center;
-        margin-bottom: 10px;
+        padding: 15px 10px;
     }
 
     .info-box {
-        border: 2px solid #000;
-        border-radius: 10px;
-        padding: 10px 15px;
-        background-color: #f9f9f9;
+        background: #fff;
+        padding: 12px 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         font-weight: bold;
-        min-width: 200px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 220px;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+        transition: background 0.3s, color 0.3s;
     }
 
-    button {
-        cursor: pointer;
-        border-radius: 6px;
+    .info-box.warning {
+        background-color: #ffe5e5;
+        color: #c00;
+        border: 1px solid #c00;
     }
 
-    #toggleList {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        padding: 5px 10px;
-    }
-
-    #toggleList:hover {
-        background-color: #0056b3;
-    }
-
-    .clearAllBtn {
-        background-color: red;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        padding: 5px 10px;
+    .info-box button {
         margin-top: 5px;
-        display: none;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 8px;
+        background-color: #1f2937;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.3s;
     }
 
-    /* ===== Table Section ===== */
-    .table-container {
-        flex: 1;
-        overflow-y: auto;
-        margin-top: 230px; /* space for fixed header */
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    thead {
-        position: sticky;
-        top: 0;
-        background-color: #f2f2f2;
-        z-index: 500;
-    }
-
-    th, td {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-    }
-
-    th {
-        background-color: #f2f2f2;
-        font-weight: bold;
-    }
-
-    tr:hover {
-        background-color: #f9f9f9;
+    .info-box button:hover {
+        background-color: #111827;
     }
 
     /* ===== Selected Games List ===== */
     .selectedGames {
-        margin: 10px auto;
-        width: 80%;
-        border: 2px solid #000;
-        border-radius: 10px;
-        background-color: #f2f2f2;
         display: none;
-        padding: 10px;
+        max-width: 600px;
+        margin: 0 auto 20px auto;
+        background: #f1f5f9;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     .selectedGames ul {
-        margin: 5px 0 0 0;
-        padding: 0;
+        list-style: none;
         max-height: 300px;
         overflow-y: auto;
-        list-style-type: none;
+        padding: 0;
     }
 
     .selectedGames li {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 4px 0;
+        padding: 6px 0;
+        border-bottom: 1px solid #ddd;
     }
 
-    .removeBtn {
-        margin-left: 10px;
-        background-color: red;
+    .selectedGames button.removeBtn {
+        background-color: #e11d48;
+        border: none;
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .selectedGames button.removeBtn:hover {
+        background-color: #b91c1c;
+    }
+
+    .clearAllBtn {
+        margin-top: 10px;
+        padding: 6px 12px;
+        background-color: #e11d48;
         color: #fff;
         border: none;
-        border-radius: 5px;
+        border-radius: 8px;
         cursor: pointer;
-        padding: 2px 6px;
+        display: none;
+        transition: background 0.3s;
     }
 
+    .clearAllBtn:hover {
+        background-color: #b91c1c;
+    }
+
+    /* ===== Table ===== */
+    table {
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto 40px auto;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+        text-align: left;
+    }
+
+    th {
+        background: #1f2937;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    tr:hover {
+        background: #f1f5f9;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+        .info-container {
+            flex-direction: column;
+        }
+
+        table, th, td {
+            font-size: 14px;
+        }
+
+        #searchBar {
+            width: 90%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .info-box {
+            min-width: 100%;
+        }
+    }
 </style>
 </head>
 <body>
 
-<!-- ===== Fixed Solid Header ===== -->
-<div class="header">
-    <div class="header-section">
-        <h1>PC GAME List</h1>
-        <input type="text" id="searchBar" placeholder="Search for a game...">
-        <div class="header-info">
-            <div class="info-box" id="totalBox">Total Size: <span id="totalSize">0 / 450 GB</span></div>
-            <div class="info-box">
-                Games Added: <span id="gameCount">0</span>
-                <button id="toggleList">Show Selected Games</button>
-            </div>
-        </div>
+<h1>PC GAME List</h1>
+
+<div id="searchContainer">
+    <input type="text" id="searchBar" placeholder="Search for a game...">
+</div>
+
+<div class="info-container">
+    <div class="info-box total">Total Size: <span id="totalSize">0 / 450 GB</span></div>
+    <div class="info-box counter">
+        Games Added: <span id="gameCount">0</span>
+        <button id="toggleList">Show Selected Games</button>
     </div>
 </div>
 
-<!-- ===== Selected Games List ===== -->
 <div class="selectedGames" id="selectedGamesDiv">
     <strong>Selected Games:</strong>
     <ul id="selectedGamesList"></ul>
     <button class="clearAllBtn" id="clearAllBtn">Clear All</button>
 </div>
 
-<!-- ===== Table Section ===== -->
-<div class="table-container">
-    <table>
-        <thead>
-            <tr>
-                <th>Select</th>
-                <th>Game Title</th>
-                <th>Size (GB)</th>
-            </tr>
-        </thead>
-        <tbody id="gameTable"></tbody>
-    </table>
-</div>
+<table>
+    <thead>
+        <tr>
+            <th>Select</th>
+            <th>Game Title</th>
+            <th>Size (GB)</th>
+        </tr>
+    </thead>
+    <tbody id="gameTable"></tbody>
+</table>
 
 <script>
 const games = [
@@ -450,11 +491,11 @@ const selectedGamesList = document.getElementById("selectedGamesList");
 const selectedGamesDiv = document.getElementById("selectedGamesDiv");
 const toggleButton = document.getElementById("toggleList");
 const clearAllBtn = document.getElementById("clearAllBtn");
-const totalBox = document.getElementById("totalBox");
 const totalLimit = 450;
 
 let selectedGames = [];
 
+// Render table
 function renderTable() {
     tableBody.innerHTML = "";
     games.forEach((game, index) => {
@@ -467,30 +508,34 @@ function renderTable() {
         tableBody.appendChild(row);
     });
 }
+
 renderTable();
 
+// Toggle game selection
 function toggleGame(index, checkbox) {
     if (checkbox.checked) selectedGames.push(index);
     else selectedGames = selectedGames.filter(i => i !== index);
     updateSelectedGames();
 }
 
+// Remove single game
 function removeGame(index) {
     selectedGames = selectedGames.filter(i => i !== index);
     renderTable();
     updateSelectedGames();
 }
 
+// Clear all games
 function clearAllGames() {
     selectedGames = [];
     renderTable();
     updateSelectedGames();
 }
 
+// Update selected games display and info
 function updateSelectedGames() {
     let total = 0;
     selectedGamesList.innerHTML = "";
-
     clearAllBtn.style.display = selectedGames.length > 0 ? "inline-block" : "none";
 
     selectedGames.forEach(i => {
@@ -507,16 +552,13 @@ function updateSelectedGames() {
 
     gameCount.textContent = selectedGames.length;
 
+    const totalDiv = document.querySelector(".total");
     if (total > totalLimit) {
-        totalBox.style.backgroundColor = "#ffcccc";
-        totalBox.style.borderColor = "red";
-        totalBox.style.color = "red";
-        totalBox.innerHTML = `⚠️ Over the 450GB limit!<br>Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
+        totalDiv.classList.add("warning");
+        totalDiv.innerHTML = `⚠️ Over the 450GB limit!<br>Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
     } else {
-        totalBox.style.backgroundColor = "#f9f9f9";
-        totalBox.style.borderColor = "#000";
-        totalBox.style.color = "#000";
-        totalBox.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
+        totalDiv.classList.remove("warning");
+        totalDiv.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
     }
 
     const checkboxes = tableBody.querySelectorAll("input[type='checkbox']");
@@ -529,6 +571,7 @@ function updateSelectedGames() {
     }
 }
 
+// Toggle selected games list
 toggleButton.addEventListener("click", () => {
     if (selectedGamesDiv.style.display === "none") {
         selectedGamesDiv.style.display = "block";
@@ -541,6 +584,7 @@ toggleButton.addEventListener("click", () => {
 
 clearAllBtn.addEventListener("click", clearAllGames);
 
+// Search functionality
 const searchBar = document.getElementById("searchBar");
 searchBar.addEventListener("keyup", function() {
     const filter = this.value.toLowerCase();
@@ -551,6 +595,7 @@ searchBar.addEventListener("keyup", function() {
     }
 });
 
+// Initial state
 selectedGamesDiv.style.display = "none";
 clearAllBtn.style.display = "none";
 </script>
