@@ -42,20 +42,25 @@
         z-index: 100;
         margin-bottom: 10px;
     }
-    .basket {
-    position: sticky;
-    top: 80px; /* keeps basket below the Total Size box */
-    border: 2px solid #000;
-    padding: 10px;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-    margin-bottom: 20px;
-    z-index: 99;
+    .counter {
+        position: sticky;
+        top: 70px;
+        background-color: #f9f9f9;
+        border: 2px solid #000;
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: bold;
+        z-index: 99;
+        text-align: center;
+        margin-bottom: 10px;
     }
-
-    .basket li {
-        border-bottom: 1px solid #ddd;
-        padding: 5px 0;
+    .selectedGames {
+        margin-top: 10px;
+        padding: 10px;
+        border: 2px solid #000;
+        border-radius: 10px;
+        background-color: #f2f2f2;
+        display: none; /* Hidden by default */
     }
 </style>
 </head>
@@ -65,11 +70,16 @@
 <!-- Total size box -->
 <div class="total">Total Size: <span id="totalSize">0 / 450 GB</span></div>
 
-<!-- Basket moved here -->
-<div class="basket">
-    <h2>🛒 Basket</h2>
-    <p><strong>Games Added:</strong> <span id="gameCount">0</span></p>
-    <ul id="basketList"></ul>
+<!-- Games Added Counter -->
+<div class="counter">
+    Games Added: <span id="gameCount">0</span>
+    <button id="toggleList" style="margin-left: 10px;">Show Selected Games</button>
+</div>
+
+<!-- Selected Games List -->
+<div class="selectedGames" id="selectedGamesDiv">
+    <strong>Selected Games:</strong>
+    <ul id="selectedGamesList"></ul>
 </div>
 
 <!-- Game table -->
@@ -81,9 +91,7 @@
             <th>Size (GB)</th>
         </tr>
     </thead>
-    <tbody id="gameTable">
-        <!-- Games inserted here by JS -->
-    </tbody>
+    <tbody id="gameTable"></tbody>
 </table>
 
 <script>
@@ -327,8 +335,10 @@ const games = [
 ];
 
 const tableBody = document.getElementById("gameTable");
-const basketList = document.getElementById("basketList");
 const gameCount = document.getElementById("gameCount");
+const selectedGamesList = document.getElementById("selectedGamesList");
+const selectedGamesDiv = document.getElementById("selectedGamesDiv");
+const toggleButton = document.getElementById("toggleList");
 const totalLimit = 450; // 450GB limit
 
 // Create table rows dynamically
@@ -344,24 +354,22 @@ games.forEach((game, index) => {
 
 function updateTotal() {
     let total = 0;
-    let selectedGames = [];
+    let selectedCount = 0;
     const checkboxes = tableBody.querySelectorAll("input[type='checkbox']");
-    
+    selectedGamesList.innerHTML = ""; // Clear current list
+
     checkboxes.forEach((cb, i) => {
         if (cb.checked) {
             total += games[i].size;
-            selectedGames.push(games[i].title);
+            selectedCount++;
+            const li = document.createElement("li");
+            li.textContent = games[i].title;
+            selectedGamesList.appendChild(li);
         }
     });
 
-    // Update basket
-    basketList.innerHTML = "";
-    selectedGames.forEach(title => {
-        const li = document.createElement("li");
-        li.textContent = title;
-        basketList.appendChild(li);
-    });
-    gameCount.textContent = selectedGames.length;
+    // Update counter
+    gameCount.textContent = selectedCount;
 
     // Update total size box
     const totalDivs = document.querySelectorAll(".total");
@@ -380,10 +388,19 @@ function updateTotal() {
     });
 }
 
-// Set initial display
-document.querySelectorAll(".total").forEach(div => {
-    div.innerHTML = `Total Size: 0 / ${totalLimit} GB`;
+// Toggle the selected games list
+toggleButton.addEventListener("click", () => {
+    if (selectedGamesDiv.style.display === "none") {
+        selectedGamesDiv.style.display = "block";
+        toggleButton.textContent = "Hide Selected Games";
+    } else {
+        selectedGamesDiv.style.display = "none";
+        toggleButton.textContent = "Show Selected Games";
+    }
 });
+
+// Set initial display
+selectedGamesDiv.style.display = "none";
 </script>
 </body>
 </html>
