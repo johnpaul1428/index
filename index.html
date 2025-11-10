@@ -375,7 +375,6 @@ const clearAllBtn = document.getElementById("clearAllBtn");
 const totalLimit = 450;
 
 let selectedGames = [];
-let currentTotal = 0;
 
 // Create table rows dynamically
 games.forEach((game, index) => {
@@ -389,67 +388,74 @@ games.forEach((game, index) => {
 });
 
 function toggleGame(index, checkbox) {
-    const gameSize = games[index].size;
     if (checkbox.checked) {
-        if (currentTotal + gameSize > totalLimit) {
-            alert("Cannot select this game. Total size would exceed 450GB!");
-            checkbox.checked = false;
-            return;
-        }
         selectedGames.push(index);
-        currentTotal += gameSize;
     } else {
         selectedGames = selectedGames.filter(i => i !== index);
-        currentTotal -= gameSize;
     }
     updateSelectedGames();
 }
 
 function removeGame(index) {
-    const gameSize = games[index].size;
     selectedGames = selectedGames.filter(i => i !== index);
     tableBody.querySelectorAll("input[type='checkbox']")[index].checked = false;
-    currentTotal -= gameSize;
     updateSelectedGames();
 }
 
 function clearAllGames() {
     selectedGames = [];
     tableBody.querySelectorAll("input[type='checkbox']").forEach(cb => cb.checked = false);
-    currentTotal = 0;
     updateSelectedGames();
 }
 
 function updateSelectedGames() {
+    let total = 0;
     selectedGamesList.innerHTML = "";
+
     clearAllBtn.style.display = selectedGames.length > 0 ? "inline-block" : "none";
 
     selectedGames.forEach(i => {
+        total += games[i].size;
         const li = document.createElement("li");
         li.innerHTML = `📌 ${games[i].title}`;
+
         const removeBtn = document.createElement("button");
         removeBtn.textContent = "Remove";
         removeBtn.className = "removeBtn";
         removeBtn.onclick = () => removeGame(i);
         li.appendChild(removeBtn);
+
         selectedGamesList.appendChild(li);
     });
 
     gameCount.textContent = selectedGames.length;
 
     const totalDivs = document.querySelectorAll(".total");
-    totalDivs.forEach(div => {
-        div.innerHTML = `Total Size: ${currentTotal.toFixed(2)} / ${totalLimit} GB`;
-        if (currentTotal > totalLimit) {
+    if (total > totalLimit) {
+        totalDivs.forEach(div => {
             div.style.backgroundColor = "#ffcccc";
             div.style.borderColor = "red";
             div.style.color = "red";
-        } else {
+            div.innerHTML = `⚠️ Over the 450GB limit!<br>Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
+        });
+    } else {
+        totalDivs.forEach(div => {
             div.style.backgroundColor = "#fff";
             div.style.borderColor = "#000";
             div.style.color = "#000";
-        }
-    });
+            div.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
+        });
+    }
+
+    // Disable unchecked checkboxes if limit reached
+    const checkboxes = tableBody.querySelectorAll("input[type='checkbox']");
+    if (total >= totalLimit) {
+        checkboxes.forEach((cb, i) => {
+            if (!cb.checked) cb.disabled = true;
+        });
+    } else {
+        checkboxes.forEach(cb => cb.disabled = false);
+    }
 }
 
 // Toggle the selected games list
