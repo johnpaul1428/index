@@ -10,33 +10,23 @@
         background-color: #ffffff;
         color: #000000;
         padding: 20px;
+        text-align: center;
     }
     h1 {
-        text-align: center;
-        margin-bottom: 10px;
+        margin-bottom: 20px;
     }
-    #searchBar {
-        width: 100%;
-        padding: 8px 12px;
-        margin-bottom: 15px;
-        font-size: 16px;
+    .search-container {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+    .search-container input {
+        padding: 8px;
+        width: 300px;
+        border: 2px solid #000;
         border-radius: 5px;
-        border: 1px solid #ccc;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-    }
-    th, td {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-    }
-    th {
-        background-color: #f2f2f2;
-    }
-    tr:hover {
-        background-color: #f9f9f9;
+        font-size: 16px;
     }
     .total {
         position: sticky;
@@ -72,6 +62,9 @@
         background-color: #f2f2f2;
         display: none;
         z-index: 98;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
     }
     .selectedGames ul {
         margin: 5px 0 0 0;
@@ -105,12 +98,30 @@
         margin-top: 5px;
         display: none;
     }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    th, td {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    tr:hover {
+        background-color: #f9f9f9;
+    }
 </style>
 </head>
 <body>
 <h1>PC GAME List</h1>
 
-<input type="text" id="searchBar" placeholder="Search games...">
+<div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search games...">
+</div>
 
 <div class="total">Total Size: <span id="totalSize">0 / 450 GB</span></div>
 
@@ -382,32 +393,30 @@ const selectedGamesList = document.getElementById("selectedGamesList");
 const selectedGamesDiv = document.getElementById("selectedGamesDiv");
 const toggleButton = document.getElementById("toggleList");
 const clearAllBtn = document.getElementById("clearAllBtn");
-const searchBar = document.getElementById("searchBar");
 const totalLimit = 450;
+const searchInput = document.getElementById("searchInput");
 
 let selectedGames = [];
 
 // Create table rows dynamically
-function renderTable(filter = "") {
+function renderTable(filteredGames = games) {
     tableBody.innerHTML = "";
-    games.forEach((game, index) => {
-        if (game.title.toLowerCase().includes(filter.toLowerCase())) {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td><input type="checkbox" onchange="toggleGame(${index}, this)" ${selectedGames.includes(index) ? "checked" : ""}></td>
-                <td>${game.title}</td>
-                <td>${game.size} GB</td>
-            `;
-            tableBody.appendChild(row);
-        }
+    filteredGames.forEach((game, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td><input type="checkbox" onchange="toggleGame(${index}, this)"></td>
+            <td>${game.title}</td>
+            <td>${game.size} GB</td>
+        `;
+        tableBody.appendChild(row);
     });
-    updateSelectedGames();
 }
+renderTable();
 
-// Checkbox toggle
+// Toggle game selection
 function toggleGame(index, checkbox) {
     if (checkbox.checked) {
-        if (!selectedGames.includes(index)) selectedGames.push(index);
+        selectedGames.push(index);
     } else {
         selectedGames = selectedGames.filter(i => i !== index);
     }
@@ -417,13 +426,15 @@ function toggleGame(index, checkbox) {
 // Remove a single game
 function removeGame(index) {
     selectedGames = selectedGames.filter(i => i !== index);
-    renderTable(searchBar.value);
+    tableBody.querySelectorAll("input[type='checkbox']")[index].checked = false;
+    updateSelectedGames();
 }
 
-// Clear all selections
+// Clear all selected games
 function clearAllGames() {
     selectedGames = [];
-    renderTable(searchBar.value);
+    tableBody.querySelectorAll("input[type='checkbox']").forEach(cb => cb.checked = false);
+    updateSelectedGames();
 }
 
 // Update selected games list and total size
@@ -469,7 +480,7 @@ function updateSelectedGames() {
     // Disable unchecked checkboxes if limit reached
     const checkboxes = tableBody.querySelectorAll("input[type='checkbox']");
     if (total >= totalLimit) {
-        checkboxes.forEach((cb) => {
+        checkboxes.forEach((cb, i) => {
             if (!cb.checked) cb.disabled = true;
         });
     } else {
@@ -477,7 +488,7 @@ function updateSelectedGames() {
     }
 }
 
-// Toggle selected games list
+// Toggle selected games list visibility
 toggleButton.addEventListener("click", () => {
     if (selectedGamesDiv.style.display === "none") {
         selectedGamesDiv.style.display = "block";
@@ -488,16 +499,27 @@ toggleButton.addEventListener("click", () => {
     }
 });
 
-// Clear all button
+// Clear All button
 clearAllBtn.addEventListener("click", clearAllGames);
 
-// Search functionality
-searchBar.addEventListener("input", () => {
-    renderTable(searchBar.value);
+// Search filter
+searchInput.addEventListener("input", () => {
+    const query = searchInput.value.toLowerCase();
+    const filteredGames = games.filter(game => game.title.toLowerCase().includes(query));
+    renderTable(filteredGames);
+
+    // Restore checkboxes for selected games
+    filteredGames.forEach((game, index) => {
+        const originalIndex = games.indexOf(game);
+        if (selectedGames.includes(originalIndex)) {
+            tableBody.querySelectorAll("input[type='checkbox']")[index].checked = true;
+        }
+    });
 });
 
-// Initial render
-renderTable();
+// Initial state
+selectedGamesDiv.style.display = "none";
+clearAllBtn.style.display = "none";
 </script>
 </body>
 </html>
