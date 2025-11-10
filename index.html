@@ -18,7 +18,7 @@
     table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 20px;
+        margin-top: 20px;
     }
     th, td {
         padding: 8px 12px;
@@ -31,21 +31,48 @@
         background-color: #f9f9f9;
     }
     .total {
+        position: sticky;
+        top: 0;
+        background-color: #fff;
+        border: 2px solid #000;
+        padding: 10px;
+        font-weight: bold;
+        font-size: 18px;
+        text-align: center;
+        z-index: 100;
+        margin-bottom: 10px;
+    }
+    .basket {
     position: sticky;
-    top: 0;
-    background-color: #fff;
+    top: 80px; /* keeps basket below the Total Size box */
     border: 2px solid #000;
     padding: 10px;
-    font-weight: bold;
-    font-size: 18px;
-    text-align: center;
-    z-index: 100;
-}
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+    z-index: 99;
+    }
+
+    .basket li {
+        border-bottom: 1px solid #ddd;
+        padding: 5px 0;
+    }
 </style>
 </head>
 <body>
 <h1>PC Game List</h1>
-<div class="total">Total Size: <span id="totalSize">0 GB</span></div>
+
+<!-- Total size box -->
+<div class="total">Total Size: <span id="totalSize">0 / 450 GB</span></div>
+
+<!-- Basket moved here -->
+<div class="basket">
+    <h2>🛒 Basket</h2>
+    <p><strong>Games Added:</strong> <span id="gameCount">0</span></p>
+    <ul id="basketList"></ul>
+</div>
+
+<!-- Game table -->
 <table>
     <thead>
         <tr>
@@ -300,8 +327,11 @@ const games = [
 ];
 
 const tableBody = document.getElementById("gameTable");
+const basketList = document.getElementById("basketList");
+const gameCount = document.getElementById("gameCount");
 const totalLimit = 450; // 450GB limit
 
+// Create table rows dynamically
 games.forEach((game, index) => {
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -314,18 +344,26 @@ games.forEach((game, index) => {
 
 function updateTotal() {
     let total = 0;
+    let selectedGames = [];
     const checkboxes = tableBody.querySelectorAll("input[type='checkbox']");
-    checkboxes.forEach((cb, i) => {
-        if (cb.checked) total += games[i].size;
-    });
     
-    let display;
-    if (total >= 1024) {
-        display = (total / 1024).toFixed(2) + " TB (" + total.toFixed(2) + " GB)";
-    } else {
-        display = total.toFixed(2) + " GB";
-    }
+    checkboxes.forEach((cb, i) => {
+        if (cb.checked) {
+            total += games[i].size;
+            selectedGames.push(games[i].title);
+        }
+    });
 
+    // Update basket
+    basketList.innerHTML = "";
+    selectedGames.forEach(title => {
+        const li = document.createElement("li");
+        li.textContent = title;
+        basketList.appendChild(li);
+    });
+    gameCount.textContent = selectedGames.length;
+
+    // Update total size box
     const totalDivs = document.querySelectorAll(".total");
     totalDivs.forEach(div => {
         if (total > totalLimit) {
@@ -342,9 +380,10 @@ function updateTotal() {
     });
 }
 
-// Set default display on page load
+// Set initial display
 document.querySelectorAll(".total").forEach(div => {
     div.innerHTML = `Total Size: 0 / ${totalLimit} GB`;
 });
-</script></body>
+</script>
+</body>
 </html>
