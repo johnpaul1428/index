@@ -10,23 +10,36 @@
         background-color: #ffffff;
         color: #000000;
         padding: 20px;
-        text-align: center;
     }
     h1 {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    #searchContainer {
+        text-align: center;
         margin-bottom: 20px;
     }
-    .search-container {
-        margin-bottom: 20px;
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-    }
-    .search-container input {
-        padding: 8px;
-        width: 300px;
-        border: 2px solid #000;
-        border-radius: 5px;
+    #searchBar {
+        width: 60%;
+        padding: 10px;
         font-size: 16px;
+        border: 2px solid #000;
+        border-radius: 8px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    th, td {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    tr:hover {
+        background-color: #f9f9f9;
     }
     .total {
         position: sticky;
@@ -62,9 +75,6 @@
         background-color: #f2f2f2;
         display: none;
         z-index: 98;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
     }
     .selectedGames ul {
         margin: 5px 0 0 0;
@@ -98,29 +108,14 @@
         margin-top: 5px;
         display: none;
     }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-    th, td {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        text-align: left;
-    }
-    th {
-        background-color: #f2f2f2;
-    }
-    tr:hover {
-        background-color: #f9f9f9;
-    }
 </style>
 </head>
 <body>
 <h1>PC GAME List</h1>
 
-<div class="search-container">
-    <input type="text" id="searchInput" placeholder="Search games...">
+<!-- Search bar -->
+<div id="searchContainer">
+    <input type="text" id="searchBar" placeholder="Search for a game...">
 </div>
 
 <div class="total">Total Size: <span id="totalSize">0 / 450 GB</span></div>
@@ -394,50 +389,43 @@ const selectedGamesDiv = document.getElementById("selectedGamesDiv");
 const toggleButton = document.getElementById("toggleList");
 const clearAllBtn = document.getElementById("clearAllBtn");
 const totalLimit = 450;
-const searchInput = document.getElementById("searchInput");
 
+// Generate game rows dynamically
 let selectedGames = [];
 
-// Create table rows dynamically
-function renderTable(filteredGames = games) {
+function renderTable() {
     tableBody.innerHTML = "";
-    filteredGames.forEach((game, index) => {
+    games.forEach((game, index) => {
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td><input type="checkbox" onchange="toggleGame(${index}, this)"></td>
+            <td><input type="checkbox" onchange="toggleGame(${index}, this)" ${selectedGames.includes(index) ? "checked" : ""}></td>
             <td>${game.title}</td>
             <td>${game.size} GB</td>
         `;
         tableBody.appendChild(row);
     });
 }
+
 renderTable();
 
-// Toggle game selection
 function toggleGame(index, checkbox) {
-    if (checkbox.checked) {
-        selectedGames.push(index);
-    } else {
-        selectedGames = selectedGames.filter(i => i !== index);
-    }
+    if (checkbox.checked) selectedGames.push(index);
+    else selectedGames = selectedGames.filter(i => i !== index);
     updateSelectedGames();
 }
 
-// Remove a single game
 function removeGame(index) {
     selectedGames = selectedGames.filter(i => i !== index);
-    tableBody.querySelectorAll("input[type='checkbox']")[index].checked = false;
+    renderTable();
     updateSelectedGames();
 }
 
-// Clear all selected games
 function clearAllGames() {
     selectedGames = [];
-    tableBody.querySelectorAll("input[type='checkbox']").forEach(cb => cb.checked = false);
+    renderTable();
     updateSelectedGames();
 }
 
-// Update selected games list and total size
 function updateSelectedGames() {
     let total = 0;
     selectedGamesList.innerHTML = "";
@@ -448,13 +436,11 @@ function updateSelectedGames() {
         total += games[i].size;
         const li = document.createElement("li");
         li.innerHTML = `📌 ${games[i].title}`;
-
         const removeBtn = document.createElement("button");
         removeBtn.textContent = "Remove";
         removeBtn.className = "removeBtn";
         removeBtn.onclick = () => removeGame(i);
         li.appendChild(removeBtn);
-
         selectedGamesList.appendChild(li);
     });
 
@@ -477,7 +463,7 @@ function updateSelectedGames() {
         });
     }
 
-    // Disable unchecked checkboxes if limit reached
+    // Disable unchecked checkboxes if over limit
     const checkboxes = tableBody.querySelectorAll("input[type='checkbox']");
     if (total >= totalLimit) {
         checkboxes.forEach((cb, i) => {
@@ -488,7 +474,7 @@ function updateSelectedGames() {
     }
 }
 
-// Toggle selected games list visibility
+// Toggle selected games list
 toggleButton.addEventListener("click", () => {
     if (selectedGamesDiv.style.display === "none") {
         selectedGamesDiv.style.display = "block";
@@ -502,19 +488,15 @@ toggleButton.addEventListener("click", () => {
 // Clear All button
 clearAllBtn.addEventListener("click", clearAllGames);
 
-// Search filter
-searchInput.addEventListener("input", () => {
-    const query = searchInput.value.toLowerCase();
-    const filteredGames = games.filter(game => game.title.toLowerCase().includes(query));
-    renderTable(filteredGames);
-
-    // Restore checkboxes for selected games
-    filteredGames.forEach((game, index) => {
-        const originalIndex = games.indexOf(game);
-        if (selectedGames.includes(originalIndex)) {
-            tableBody.querySelectorAll("input[type='checkbox']")[index].checked = true;
-        }
-    });
+// Search functionality
+const searchBar = document.getElementById("searchBar");
+searchBar.addEventListener("keyup", function() {
+    const filter = this.value.toLowerCase();
+    const rows = tableBody.getElementsByTagName("tr");
+    for (let row of rows) {
+        const title = row.cells[1].textContent.toLowerCase();
+        row.style.display = title.includes(filter) ? "" : "none";
+    }
 });
 
 // Initial state
