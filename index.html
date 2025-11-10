@@ -301,6 +301,7 @@ const games = [
 ];
 
 const tableBody = document.getElementById("gameTable");
+const totalLimit = 465; // 465GB limit
 
 games.forEach((game, index) => {
     const row = document.createElement("tr");
@@ -316,17 +317,35 @@ function updateTotal() {
     let total = 0;
     const checkboxes = tableBody.querySelectorAll("input[type='checkbox']");
     checkboxes.forEach((cb, i) => {
-        if(cb.checked) total += games[i].size;
+        if (cb.checked) total += games[i].size;
     });
     
     let display;
-    if(total >= 1024){
-        display = (total/1024).toFixed(2) + " TB (" + total.toFixed(2) + " GB)";
+    if (total >= 1024) {
+        display = (total / 1024).toFixed(2) + " TB (" + total.toFixed(2) + " GB)";
     } else {
         display = total.toFixed(2) + " GB";
     }
-    document.getElementById("totalSize").textContent = display;
+
+    const totalDivs = document.querySelectorAll(".total");
+    totalDivs.forEach(div => {
+        if (total > totalLimit) {
+            div.style.backgroundColor = "#ffcccc";
+            div.style.borderColor = "red";
+            div.style.color = "red";
+            div.innerHTML = `⚠️ Over the 465GB limit!<br>Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
+        } else {
+            div.style.backgroundColor = "#fff";
+            div.style.borderColor = "#000";
+            div.style.color = "#000";
+            div.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
+        }
+    });
 }
-</script>
-</body>
+
+// Set default display on page load
+document.querySelectorAll(".total").forEach(div => {
+    div.innerHTML = `Total Size: 0 / ${totalLimit} GB`;
+});
+</script></body>
 </html>
