@@ -3,108 +3,138 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PC GAME List</title>
+<title>PC Game List</title>
 <style>
-    /* ===== GLOBAL STYLES ===== */
     :root {
-        --primary-color: #222;
-        --accent-color: #0078ff;
-        --danger-color: #e63946;
-        --bg-light: #f9f9f9;
-        --bg-gray: #f2f2f2;
-        --radius: 10px;
+        --primary: #0078d7;
+        --accent: #005fa3;
+        --danger: #e74c3c;
+        --bg: #f8f9fa;
+        --text: #333;
+        --border: #ddd;
     }
 
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #ffffff;
-        color: var(--primary-color);
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
         margin: 0;
+        padding: 0;
     }
 
-    h1 {
-        text-align: center;
-        margin: 0;
-        font-size: 1.8rem;
-    }
-
-    button {
-        cursor: pointer;
-        font-size: 14px;
-        border-radius: var(--radius);
-        border: none;
-        padding: 8px 14px;
-        transition: all 0.2s ease-in-out;
-    }
-
-    button:hover {
-        opacity: 0.9;
-    }
-
-    /* ===== FIXED HEADER ===== */
-    .header {
-        position: fixed;
+    /* HEADER */
+    header {
+        position: sticky;
         top: 0;
-        width: 100%;
-        background-color: #fff;
-        border-bottom: 3px solid var(--primary-color);
-        z-index: 200;
+        background: #fff;
+        z-index: 120;
+        text-align: center;
         padding: 15px 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
+    header h1 {
+        margin: 0;
+        font-size: 1.8em;
+        color: var(--primary);
+    }
+
+    /* SEARCH BAR */
     #searchContainer {
+        position: sticky;
+        top: 70px;
+        background: #fff;
+        z-index: 119;
+        padding: 10px;
         text-align: center;
-        margin: 15px 0;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
     #searchBar {
-        width: 60%;
-        max-width: 500px;
+        width: 90%;
+        max-width: 400px;
         padding: 10px 15px;
-        font-size: 16px;
-        border: 2px solid var(--primary-color);
-        border-radius: var(--radius);
-        transition: 0.2s;
+        font-size: 1em;
+        border: 2px solid var(--primary);
+        border-radius: 25px;
+        outline: none;
+        transition: 0.3s;
     }
 
     #searchBar:focus {
-        outline: none;
-        border-color: var(--accent-color);
-        box-shadow: 0 0 4px var(--accent-color);
+        border-color: var(--accent);
+        box-shadow: 0 0 8px rgba(0, 120, 215, 0.3);
     }
 
-    .total, .counter, .selectedGames {
+    /* INFO CARDS */
+    .info-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin: 15px auto;
+        padding: 0 10px;
+    }
+
+    .card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 16px;
         text-align: center;
-        margin: 10px auto;
-        width: 90%;
-        max-width: 800px;
-        border: 2px solid var(--primary-color);
-        border-radius: var(--radius);
-        padding: 10px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        width: 100%;
+        max-width: 600px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+        position: sticky;
     }
 
     .total {
+        top: 130px;
         font-weight: bold;
-        font-size: 18px;
+        font-size: 1.1em;
     }
 
     .counter {
-        background-color: var(--bg-light);
-        font-weight: bold;
+        top: 190px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
     }
 
-    /* ===== SELECTED GAMES LIST ===== */
+    .counter button {
+        background: var(--primary);
+        border: none;
+        color: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .counter button:hover {
+        background: var(--accent);
+    }
+
+    /* SELECTED GAMES */
     .selectedGames {
-        background-color: var(--bg-gray);
+        position: sticky;
+        top: 260px;
+        max-width: 600px;
+        margin: 0 auto 15px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 16px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.08);
         display: none;
     }
 
     .selectedGames ul {
-        margin: 10px 0 0;
-        padding: 0;
         list-style: none;
+        margin: 8px 0 0;
+        padding: 0;
         max-height: 200px;
         overflow-y: auto;
     }
@@ -113,130 +143,121 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 6px 10px;
-        background-color: #fff;
-        margin-bottom: 6px;
-        border-radius: var(--radius);
-        border: 1px solid #ddd;
+        border-bottom: 1px solid #eee;
+        padding: 5px 0;
     }
 
-    .removeBtn {
-        background-color: var(--danger-color);
+    .selectedGames button.removeBtn {
+        background: var(--danger);
         color: #fff;
-        font-size: 13px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
         padding: 4px 8px;
+        font-size: 0.85em;
     }
 
     .clearAllBtn {
-        background-color: var(--danger-color);
+        background: var(--danger);
         color: #fff;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        padding: 6px 14px;
         margin-top: 10px;
         display: none;
     }
 
-    #toggleList {
-        background-color: var(--accent-color);
-        color: #fff;
-    }
-
-    /* ===== TABLE CONTENT ===== */
-    .content {
-        margin-top: 420px;
-        padding: 20px;
-    }
-
+    /* TABLE */
     table {
-        width: 100%;
+        width: 95%;
+        max-width: 1200px;
+        margin: 0 auto 50px;
         border-collapse: collapse;
-        border-radius: var(--radius);
+        background: #fff;
+        border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
 
     th, td {
-        padding: 12px 16px;
-        border: 1px solid #ddd;
+        padding: 10px;
         text-align: left;
     }
 
     th {
-        background-color: var(--bg-gray);
-        position: sticky;
-        top: 0;
-        z-index: 100;
+        background: var(--primary);
+        color: white;
+        font-weight: normal;
+    }
+
+    tr:nth-child(even) {
+        background: #f9f9f9;
     }
 
     tr:hover {
-        background-color: #f5f5f5;
+        background: #f1f9ff;
     }
 
     input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
+        transform: scale(1.2);
         cursor: pointer;
     }
 
-    /* ===== SCROLLBAR STYLING ===== */
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: #ccc;
-        border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #999;
-    }
-
+    /* MOBILE OPTIMIZATION */
     @media (max-width: 600px) {
-        #searchBar {
-            width: 85%;
+        header h1 {
+            font-size: 1.4em;
         }
-        .content {
-            margin-top: 460px;
+        #searchBar {
+            width: 100%;
+            max-width: 100%;
+        }
+        .card {
+            width: 95%;
+        }
+        table th:nth-child(3),
+        table td:nth-child(3) {
+            display: none; /* hide size column on small screens */
         }
     }
 </style>
 </head>
 <body>
 
-<!-- ===== HEADER SECTION ===== -->
-<div class="header">
-    <h1>🎮 PC GAME List</h1>
+<header>
+    <h1>🎮 PC Game List</h1>
+</header>
 
-    <div id="searchContainer">
-        <input type="text" id="searchBar" placeholder="Search for a game...">
-    </div>
+<div id="searchContainer">
+    <input type="text" id="searchBar" placeholder="Search for a game...">
+</div>
 
-    <div class="total">Total Size: <span id="totalSize">0 / 450 GB</span></div>
+<div class="info-container">
+    <div class="card total">Total Size: <span id="totalSize">0 / 450 GB</span></div>
 
-    <div class="counter">
+    <div class="card counter">
         Games Added: <span id="gameCount">0</span>
         <button id="toggleList">Show Selected Games</button>
     </div>
-
-    <div class="selectedGames" id="selectedGamesDiv">
-        <strong>Selected Games:</strong>
-        <ul id="selectedGamesList"></ul>
-        <button class="clearAllBtn" id="clearAllBtn">Clear All</button>
-    </div>
 </div>
 
-<!-- ===== GAME TABLE ===== -->
-<div class="content">
-    <table>
-        <thead>
-            <tr>
-                <th>Select</th>
-                <th>Game Title</th>
-                <th>Size (GB)</th>
-            </tr>
-        </thead>
-        <tbody id="gameTable"></tbody>
-    </table>
+<div class="selectedGames" id="selectedGamesDiv">
+    <strong>Selected Games:</strong>
+    <ul id="selectedGamesList"></ul>
+    <button class="clearAllBtn" id="clearAllBtn">Clear All</button>
 </div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Select</th>
+            <th>Game Title</th>
+            <th>Size (GB)</th>
+        </tr>
+    </thead>
+    <tbody id="gameTable"></tbody>
+</table>
 
 <script>
 const games = [
@@ -485,10 +506,8 @@ const selectedGamesDiv = document.getElementById("selectedGamesDiv");
 const toggleButton = document.getElementById("toggleList");
 const clearAllBtn = document.getElementById("clearAllBtn");
 const totalLimit = 450;
-
 let selectedGames = [];
 
-/* ===== RENDER TABLE ===== */
 function renderTable() {
     tableBody.innerHTML = "";
     games.forEach((game, index) => {
@@ -501,9 +520,7 @@ function renderTable() {
         tableBody.appendChild(row);
     });
 }
-renderTable();
 
-/* ===== HANDLE SELECTION ===== */
 function toggleGame(index, checkbox) {
     if (checkbox.checked) selectedGames.push(index);
     else selectedGames = selectedGames.filter(i => i !== index);
@@ -522,17 +539,15 @@ function clearAllGames() {
     updateSelectedGames();
 }
 
-/* ===== UPDATE SELECTION DISPLAY ===== */
 function updateSelectedGames() {
     let total = 0;
     selectedGamesList.innerHTML = "";
-
     clearAllBtn.style.display = selectedGames.length > 0 ? "inline-block" : "none";
 
     selectedGames.forEach(i => {
         total += games[i].size;
         const li = document.createElement("li");
-        li.innerHTML = `🎯 ${games[i].title}`;
+        li.innerHTML = `📌 ${games[i].title}`;
         const removeBtn = document.createElement("button");
         removeBtn.textContent = "Remove";
         removeBtn.className = "removeBtn";
@@ -542,31 +557,27 @@ function updateSelectedGames() {
     });
 
     gameCount.textContent = selectedGames.length;
-
     const totalDiv = document.querySelector(".total");
+
     if (total > totalLimit) {
-        totalDiv.style.backgroundColor = "#ffe6e6";
+        totalDiv.style.backgroundColor = "#ffe5e5";
         totalDiv.style.borderColor = "red";
         totalDiv.style.color = "red";
-        totalDiv.innerHTML = `⚠️ Over the 450GB limit!<br>Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
+        totalDiv.innerHTML = `⚠️ Over 450GB! Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
     } else {
         totalDiv.style.backgroundColor = "#fff";
-        totalDiv.style.borderColor = "#000";
         totalDiv.style.color = "#000";
         totalDiv.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
     }
 
     const checkboxes = tableBody.querySelectorAll("input[type='checkbox']");
     if (total >= totalLimit) {
-        checkboxes.forEach((cb, i) => {
-            if (!cb.checked) cb.disabled = true;
-        });
+        checkboxes.forEach(cb => { if (!cb.checked) cb.disabled = true; });
     } else {
         checkboxes.forEach(cb => cb.disabled = false);
     }
 }
 
-/* ===== TOGGLE LIST DISPLAY ===== */
 toggleButton.addEventListener("click", () => {
     if (selectedGamesDiv.style.display === "none") {
         selectedGamesDiv.style.display = "block";
@@ -576,11 +587,10 @@ toggleButton.addEventListener("click", () => {
         toggleButton.textContent = "Show Selected Games";
     }
 });
+
 clearAllBtn.addEventListener("click", clearAllGames);
 
-/* ===== SEARCH FILTER ===== */
-const searchBar = document.getElementById("searchBar");
-searchBar.addEventListener("keyup", function() {
+document.getElementById("searchBar").addEventListener("keyup", function() {
     const filter = this.value.toLowerCase();
     const rows = tableBody.getElementsByTagName("tr");
     for (let row of rows) {
@@ -589,8 +599,8 @@ searchBar.addEventListener("keyup", function() {
     }
 });
 
-selectedGamesDiv.style.display = "none";
-clearAllBtn.style.display = "none";
+renderTable();
+updateSelectedGames();
 </script>
 
 </body>
