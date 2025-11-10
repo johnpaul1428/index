@@ -58,7 +58,6 @@
         <!-- Games inserted here by JS -->
     </tbody>
 </table>
-<div class="total">Total Size: <span id="totalSize">0 GB</span></div>
 
 <script>
 const games = [
@@ -301,7 +300,7 @@ const games = [
 ];
 
 const tableBody = document.getElementById("gameTable");
-const totalLimit = 465; // 465GB limit
+const totalLimit = 450; // 450GB limit
 
 games.forEach((game, index) => {
     const row = document.createElement("tr");
@@ -333,7 +332,7 @@ function updateTotal() {
             div.style.backgroundColor = "#ffcccc";
             div.style.borderColor = "red";
             div.style.color = "red";
-            div.innerHTML = `⚠️ Over the 465GB limit!<br>Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
+            div.innerHTML = `⚠️ Over the 450GB limit!<br>Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
         } else {
             div.style.backgroundColor = "#fff";
             div.style.borderColor = "#000";
