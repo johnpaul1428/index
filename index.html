@@ -17,6 +17,8 @@
         color: #0d3b66;
         padding: 20px;
     }
+
+    /* ===== Header ===== */
     h1 {
         text-align: center;
         padding: 15px 0;
@@ -24,7 +26,7 @@
         color: #ffffff;
         position: sticky;
         top: 0;
-        z-index: 110;
+        z-index: 200;
         font-size: 28px;
         border-bottom: 2px solid #073763;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -38,7 +40,7 @@
         top: 70px;
         background-color: #f0f4f8;
         padding: 10px;
-        z-index: 109;
+        z-index: 180;
         border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
@@ -56,7 +58,92 @@
         box-shadow: 0 0 5px rgba(13,59,102,0.5);
     }
 
-    /* ===== Table Styles ===== */
+    /* ===== Info Boxes ===== */
+    .total, .counter, .selectedGames {
+        position: sticky;
+        background-color: #ffffff;
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        font-weight: 600;
+        border: 1.5px solid #0d3b66;
+        color: #0d3b66;
+    }
+
+    /* Total Size (Always fully visible) */
+    .total {
+        top: 130px;
+        z-index: 190;
+        text-align: center;
+        font-size: 18px;
+        background-color: #ffffff;
+    }
+
+    .counter {
+        top: 190px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        z-index: 170;
+    }
+
+    .selectedGames {
+        top: 250px;
+        display: none;
+        flex-direction: column;
+        max-height: 350px;
+        overflow-y: auto;
+        z-index: 160;
+    }
+    .selectedGames ul {
+        list-style: none;
+        padding-left: 0;
+        margin-top: 5px;
+    }
+    .selectedGames li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid #e1e5ea;
+    }
+
+    .selectedGames button.removeBtn,
+    .clearAllBtn {
+        background-color: #0d3b66;
+        color: #ffffff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 12px;
+        transition: 0.3s;
+    }
+    .selectedGames button.removeBtn:hover,
+    .clearAllBtn:hover {
+        background-color: #073763;
+    }
+    .clearAllBtn {
+        margin-top: 10px;
+        display: none;
+    }
+
+    #toggleList {
+        background-color: #0d3b66;
+        color: #ffffff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        padding: 6px 12px;
+        transition: 0.3s;
+    }
+    #toggleList:hover {
+        background-color: #073763;
+    }
+
+    /* ===== Table ===== */
     table {
         width: 100%;
         border-collapse: collapse;
@@ -95,82 +182,6 @@
     input[type="checkbox"] {
         transform: scale(1.2);
     }
-
-    /* ===== Sticky Info Boxes ===== */
-    .total, .counter, .selectedGames {
-        position: sticky;
-        background-color: #ffffff;
-        padding: 12px 15px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        font-weight: 600;
-        z-index: 108;
-        border: 1.5px solid #0d3b66;
-        color: #0d3b66;
-    }
-    .total {
-        top: 120px;
-        text-align: center;
-        font-size: 18px;
-    }
-    .counter {
-        top: 180px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-    }
-    .selectedGames {
-        top: 240px;
-        display: none;
-        flex-direction: column;
-        max-height: 350px;
-        overflow-y: auto;
-    }
-    .selectedGames ul {
-        list-style: none;
-        padding-left: 0;
-        margin-top: 5px;
-    }
-    .selectedGames li {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 6px 0;
-        border-bottom: 1px solid #e1e5ea;
-    }
-    .selectedGames button.removeBtn,
-    .clearAllBtn {
-        background-color: #0d3b66;
-        color: #ffffff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        padding: 4px 8px;
-        font-size: 12px;
-        transition: 0.3s;
-    }
-    .selectedGames button.removeBtn:hover,
-    .clearAllBtn:hover {
-        background-color: #073763;
-    }
-    .clearAllBtn {
-        margin-top: 10px;
-        display: none;
-    }
-    #toggleList {
-        background-color: #0d3b66;
-        color: #ffffff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        padding: 6px 12px;
-        transition: 0.3s;
-    }
-    #toggleList:hover {
-        background-color: #073763;
-    }
 </style>
 </head>
 <body>
@@ -206,7 +217,6 @@
 </table>
 
 <script>
-// ===== Game Data =====
 const games = [
 {title:"A Quiet Place: The Road Ahead (2024)", size:38},
 {title:"A Way Out", size:22},
@@ -506,21 +516,17 @@ function updateSelectedGames() {
 
     gameCount.textContent = selectedGames.length;
 
-    const totalDivs = document.querySelectorAll(".total");
+    const totalDiv = document.querySelector(".total");
     if (total > totalLimit) {
-        totalDivs.forEach(div => {
-            div.style.backgroundColor = "#ffcccc";
-            div.style.borderColor = "red";
-            div.style.color = "red";
-            div.innerHTML = `⚠️ Over the 450GB limit!<br>Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
-        });
+        totalDiv.style.backgroundColor = "#ffcccc";
+        totalDiv.style.borderColor = "red";
+        totalDiv.style.color = "red";
+        totalDiv.innerHTML = `⚠️ Over the 450GB limit!<br>Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
     } else {
-        totalDivs.forEach(div => {
-            div.style.backgroundColor = "#ffffff";
-            div.style.borderColor = "#0d3b66";
-            div.style.color = "#0d3b66";
-            div.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
-        });
+        totalDiv.style.backgroundColor = "#ffffff";
+        totalDiv.style.borderColor = "#0d3b66";
+        totalDiv.style.color = "#0d3b66";
+        totalDiv.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
     }
 
     const checkboxes = tableBody.querySelectorAll("input[type='checkbox']");
