@@ -15,37 +15,38 @@
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         background-color: #ffffff;
         color: #0d3b66;
-        padding: 20px;
+        padding: 0;
     }
 
     /* ===== Header ===== */
     h1 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         text-align: center;
-        padding: 15px 0;
+        padding: 15px 10px;
         background-color: #0d3b66;
         color: #ffffff;
-        position: sticky;
-        top: 0;
-        z-index: 200;
         font-size: 28px;
         border-bottom: 2px solid #073763;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    /* ===== Search Bar ===== */
-    #searchContainer {
-        text-align: center;
-        margin: 20px auto;
+    /* ===== Sticky Top Panel ===== */
+    #topPanel {
         position: sticky;
-        top: 70px;
+        top: 0;
         background-color: #f0f4f8;
+        z-index: 999;
         padding: 10px;
-        z-index: 180;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
+
     #searchBar {
-        width: 60%;
+        width: 100%;
         padding: 10px 15px;
         font-size: 16px;
         border: 1.5px solid #0d3b66;
@@ -58,44 +59,51 @@
         box-shadow: 0 0 5px rgba(13,59,102,0.5);
     }
 
-    /* ===== Info Boxes ===== */
-    .total, .counter, .selectedGames {
-        position: sticky;
+    .infoRow {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .total, .counter {
         background-color: #ffffff;
-        padding: 12px 15px;
-        margin-bottom: 10px;
+        padding: 10px 15px;
         border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         font-weight: 600;
         border: 1.5px solid #0d3b66;
         color: #0d3b66;
-    }
-
-    /* Total Size (Always fully visible) */
-    .total {
-        top: 130px;
-        z-index: 190;
         text-align: center;
-        font-size: 18px;
-        background-color: #ffffff;
+        flex: 1 1 45%;
+        min-width: 120px;
     }
 
-    .counter {
-        top: 190px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        z-index: 170;
+    #toggleList {
+        background-color: #0d3b66;
+        color: #ffffff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        padding: 10px 15px;
+        transition: 0.3s;
+        flex: 1 1 45%;
+        min-width: 120px;
+    }
+    #toggleList:hover {
+        background-color: #073763;
     }
 
     .selectedGames {
-        top: 250px;
         display: none;
         flex-direction: column;
-        max-height: 350px;
+        max-height: 300px;
         overflow-y: auto;
-        z-index: 160;
+        margin-top: 5px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 10px;
+        border: 1.5px solid #0d3b66;
     }
     .selectedGames ul {
         list-style: none;
@@ -106,8 +114,9 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 6px 0;
+        padding: 5px 0;
         border-bottom: 1px solid #e1e5ea;
+        font-size: 14px;
     }
 
     .selectedGames button.removeBtn,
@@ -126,21 +135,9 @@
         background-color: #073763;
     }
     .clearAllBtn {
-        margin-top: 10px;
+        margin-top: 5px;
         display: none;
-    }
-
-    #toggleList {
-        background-color: #0d3b66;
-        color: #ffffff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        padding: 6px 12px;
-        transition: 0.3s;
-    }
-    #toggleList:hover {
-        background-color: #073763;
+        align-self: flex-end;
     }
 
     /* ===== Table ===== */
@@ -155,26 +152,13 @@
     }
     th, td {
         padding: 12px 15px;
-        text-align: left;
+        text-align: center;
         border-bottom: 1px solid #e1e5ea;
     }
     th {
         background-color: #0d3b66;
         color: #ffffff;
         font-weight: 600;
-        text-align: center;
-        border-right: 1px solid #073763;
-    }
-    th:last-child {
-        border-right: none;
-    }
-    td {
-        vertical-align: middle;
-        text-align: center;
-        border-right: 1px solid #e1e5ea;
-    }
-    td:last-child {
-        border-right: none;
     }
     tr:hover {
         background-color: #dbe9f4;
@@ -182,27 +166,35 @@
     input[type="checkbox"] {
         transform: scale(1.2);
     }
+
+    /* ===== Responsive ===== */
+    @media(max-width:768px){
+        #topPanel .infoRow {
+            flex-direction: column;
+            gap: 8px;
+        }
+        .total, .counter, #toggleList {
+            flex: 1 1 100%;
+        }
+    }
 </style>
 </head>
 <body>
 
 <h1>PC GAME List</h1>
 
-<div id="searchContainer">
+<div id="topPanel">
     <input type="text" id="searchBar" placeholder="Search for a game...">
-</div>
-
-<div class="total">Total Size: <span id="totalSize">0 / 450 GB</span></div>
-
-<div class="counter">
-    Games Added: <span id="gameCount">0</span>
-    <button id="toggleList">Show Selected Games</button>
-</div>
-
-<div class="selectedGames" id="selectedGamesDiv">
-    <strong>Selected Games:</strong>
-    <ul id="selectedGamesList"></ul>
-    <button class="clearAllBtn" id="clearAllBtn">Clear All</button>
+    <div class="infoRow">
+        <div class="total">Total Size: <span id="totalSize">0 / 450 GB</span></div>
+        <div class="counter">Games Added: <span id="gameCount">0</span></div>
+        <button id="toggleList">Show Selected Games</button>
+    </div>
+    <div class="selectedGames" id="selectedGamesDiv">
+        <strong>Selected Games:</strong>
+        <ul id="selectedGamesList"></ul>
+        <button class="clearAllBtn" id="clearAllBtn">Clear All</button>
+    </div>
 </div>
 
 <table>
