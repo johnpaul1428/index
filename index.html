@@ -232,7 +232,7 @@
 const OWNER_NAME = "Jay Pee";
 const totalLimit = 450;
 
-// ======= GAMES (shortened for brevity) =======
+// ======= GAMES LIST =======
 const games = [
 {title:"A Quiet Place: The Road Ahead (2024)", size:38},
 {title:"A Way Out", size:22},
@@ -571,12 +571,13 @@ function loadSelectedFromStorage() {
     try { const arr = JSON.parse(d); return Array.isArray(arr) ? arr : []; } catch { return []; }
 }
 
+// ⚠️ WARNING MESSAGE STYLE UPDATED TO RED
 let warningTimeout = null;
 function showTemporaryWarning(msg, duration = 3000) {
     const original = totalDiv.innerHTML;
-    totalDiv.style.backgroundColor = "#fff4e5";
-    totalDiv.style.borderColor = "#f1b25a";
-    totalDiv.style.color = "#8a4b00";
+    totalDiv.style.backgroundColor = "#ffe6e6";  // light red
+    totalDiv.style.borderColor = "#cc0000";      // dark red border
+    totalDiv.style.color = "#cc0000";            // red text
     totalDiv.innerHTML = `<strong>${escapeHtml(msg)}</strong>`;
     if (warningTimeout) clearTimeout(warningTimeout);
     warningTimeout = setTimeout(() => {
@@ -589,11 +590,10 @@ function showTemporaryWarning(msg, duration = 3000) {
 function updateTotalColor(total) {
     const ratio = total / totalLimit;
     let color = "#e9fff1"; // default light green
-    if (ratio < 0.5) color = "#b7f0b1";      // light green
-    else if (ratio < 0.75) color = "#fff7b0"; // yellow
-    else if (ratio < 0.9) color = "#ffd59e";  // orange
-    else color = "#ffb3a1";                   // redish
-
+    if (ratio < 0.5) color = "#b7f0b1";
+    else if (ratio < 0.75) color = "#fff7b0";
+    else if (ratio < 0.9) color = "#ffd59e";
+    else color = "#ffb3a1";
     totalDiv.style.backgroundColor = color;
     totalDiv.style.borderColor = "#0d3b66";
     totalDiv.style.color = "#0d3b66";
