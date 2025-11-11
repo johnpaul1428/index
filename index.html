@@ -117,14 +117,15 @@
     .selectedGames {
         display: none;
         flex-direction: column;
-        max-height: 300px;
-        overflow-y: auto;
         margin-top: 5px;
         background-color: #ffffff;
         border-radius: 8px;
         padding: 10px;
         border: 1.5px solid #0d3b66;
         align-items: center;
+        max-height: 70vh; /* max height if the list is very long */
+        overflow-y: auto;
+        transition: max-height 0.3s ease;
     }
     .selectedGames ul { list-style: none; padding-left: 0; margin-top: 8px; width: 100%; }
     .selectedGames li {
@@ -513,16 +514,12 @@ function renderTable(filter = "") {
 
     let displayGames = games.map((g, idx) => ({...g, index: idx}));
 
-    // Apply filter
     if(filter) displayGames = displayGames.filter(g => g.title.toLowerCase().includes(filter));
 
-    // Apply sorting
     if(sortConfig.key) {
         displayGames.sort((a,b) => {
             let valA = a[sortConfig.key], valB = b[sortConfig.key];
-            if(sortConfig.key === "title") {
-                valA = valA.toLowerCase(); valB = valB.toLowerCase();
-            }
+            if(sortConfig.key === "title") { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
             return sortConfig.ascending ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
         });
     }
@@ -593,7 +590,7 @@ searchBar.addEventListener("input", () => renderTable(searchBar.value.trim().toL
 clearAllBtn.addEventListener("click", () => { if (confirm("Clear all selected games?")) clearAllGames(); });
 
 function saveSelectedToStorage() { localStorage.setItem("pg_selected_v1", JSON.stringify(selectedGames)); }
-function loadSelectedFromStorage() { const d = localStorage.getItem("pg_selected_v1"); try { return d ? JSON.parse(d) : [] } catch { return [] } }
+function loadSelectedFromStorage() { const d = localStorage.getItem("pg_selected_v1"); try { return d ? JSON.parse(d) : [] } catch { return []; } }
 
 let warningTimeout = null;
 function showTemporaryWarning(msg, duration = 3000) {
