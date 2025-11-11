@@ -73,7 +73,7 @@
         gap: 10px;
     }
     .total, .counter {
-        background-color: #e9fff1; /* light green start */
+        background-color: #e9fff1;
         padding: 10px 15px;
         border-radius: 8px;
         font-weight: 600;
@@ -84,18 +84,35 @@
         min-width: 120px;
         transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
     }
+    /* ===== Improved Show Selected Games Button ===== */
     #toggleList {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
         background-color: #0d3b66;
         color: #ffffff;
         border: none;
-        border-radius: 5px;
+        border-radius: 8px;
         cursor: pointer;
-        padding: 10px 15px;
-        transition: 0.2s;
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.25s ease;
         flex: 1 1 45%;
         min-width: 120px;
     }
-    #toggleList:hover { background-color: #073763; }
+    #toggleList:hover {
+        background-color: #073763;
+        transform: translateY(-2px);
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+    #toggleList svg {
+        width: 16px;
+        height: 16px;
+        transition: transform 0.25s ease;
+    }
+    #toggleList.expanded svg { transform: rotate(180deg); }
     .selectedGames {
         display: none;
         flex-direction: column;
@@ -199,7 +216,12 @@
     <div class="infoRow">
         <div class="total" id="totalDiv">Total Size: <span id="totalSize">0 / 450 GB</span></div>
         <div class="counter">Games Added: <span id="gameCount">0</span></div>
-        <button id="toggleList" aria-expanded="false">Show Selected Games</button>
+        <button id="toggleList" aria-expanded="false">
+            <span>Show Selected Games</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 9l6 6 6-6"></path>
+            </svg>
+        </button>
     </div>
     <div class="selectedGames" id="selectedGamesDiv" aria-hidden="true">
         <strong>Selected Games:</strong>
@@ -472,6 +494,7 @@ const games = [
 {title:"WWE 2K25 The Bloodline Edition Complete DLC", size:92}
 ];
 
+// ======= VARIABLES =======
 let selectedGames = loadSelectedFromStorage();
 const tableBody = document.getElementById("gameTable");
 const gameCount = document.getElementById("gameCount");
@@ -484,6 +507,7 @@ const searchBar = document.getElementById("searchBar");
 document.getElementById("year").textContent = new Date().getFullYear();
 document.getElementById("ownerBadge").textContent = `Owned by ${OWNER_NAME}`;
 
+// ======= RENDER TABLE =======
 function renderTable(filter = "") {
     tableBody.innerHTML = "";
     games.forEach((game, index) => {
@@ -503,6 +527,7 @@ function renderTable(filter = "") {
     updateSelectedGamesUI();
 }
 
+// ======= TOGGLE REQUEST =======
 function onToggleRequest(index, checkboxEl) {
     const total = computeSelectedTotal();
     const size = Number(games[index].size);
@@ -520,18 +545,19 @@ function onToggleRequest(index, checkboxEl) {
     updateSelectedGamesUI();
 }
 
+// ======= REMOVE & CLEAR =======
 function removeGame(index) {
     selectedGames = selectedGames.filter(i => i !== index);
     saveSelectedToStorage();
     renderTable(searchBar.value.trim().toLowerCase());
 }
-
 function clearAllGames() {
     selectedGames = [];
     saveSelectedToStorage();
     renderTable(searchBar.value.trim().toLowerCase());
 }
 
+// ======= UPDATE SELECTED GAMES UI =======
 function updateSelectedGamesUI() {
     selectedGamesList.innerHTML = "";
     const total = computeSelectedTotal();
@@ -550,18 +576,24 @@ function updateSelectedGamesUI() {
     updateTotalColor(total);
 }
 
+// ======= TOTAL COMPUTE =======
 function computeSelectedTotal() {
     return selectedGames.reduce((sum, i) => sum + (games[i].size || 0), 0);
 }
 
+// ======= TOGGLE SELECTED GAMES DIV =======
 toggleButton.addEventListener("click", () => {
     const isHidden = selectedGamesDiv.style.display === "none" || selectedGamesDiv.style.display === "";
     selectedGamesDiv.style.display = isHidden ? "flex" : "none";
-    toggleButton.textContent = isHidden ? "Hide Selected Games" : "Show Selected Games";
+    toggleButton.querySelector("span").textContent = isHidden ? "Hide Selected Games" : "Show Selected Games";
+    toggleButton.classList.toggle("expanded", isHidden);
 });
+
+// ======= SEARCH =======
 searchBar.addEventListener("input", () => renderTable(searchBar.value.trim().toLowerCase()));
 clearAllBtn.addEventListener("click", () => { if (confirm("Clear all selected games?")) clearAllGames(); });
 
+// ======= STORAGE =======
 function saveSelectedToStorage() {
     localStorage.setItem("pg_selected_v1", JSON.stringify(selectedGames));
 }
@@ -571,13 +603,13 @@ function loadSelectedFromStorage() {
     try { const arr = JSON.parse(d); return Array.isArray(arr) ? arr : []; } catch { return []; }
 }
 
-// ⚠️ WARNING MESSAGE STYLE UPDATED TO RED
+// ======= WARNING =======
 let warningTimeout = null;
 function showTemporaryWarning(msg, duration = 3000) {
     const original = totalDiv.innerHTML;
-    totalDiv.style.backgroundColor = "#ffe6e6";  // light red
-    totalDiv.style.borderColor = "#cc0000";      // dark red border
-    totalDiv.style.color = "#cc0000";            // red text
+    totalDiv.style.backgroundColor = "#ffe6e6"; 
+    totalDiv.style.borderColor = "#cc0000";     
+    totalDiv.style.color = "#cc0000";            
     totalDiv.innerHTML = `<strong>${escapeHtml(msg)}</strong>`;
     if (warningTimeout) clearTimeout(warningTimeout);
     warningTimeout = setTimeout(() => {
@@ -586,10 +618,10 @@ function showTemporaryWarning(msg, duration = 3000) {
     }, duration);
 }
 
-// 🎨 Dynamic Color Logic for TotalDiv
+// ======= DYNAMIC COLOR =======
 function updateTotalColor(total) {
     const ratio = total / totalLimit;
-    let color = "#e9fff1"; // default light green
+    let color = "#e9fff1";
     if (ratio < 0.5) color = "#b7f0b1";
     else if (ratio < 0.75) color = "#fff7b0";
     else if (ratio < 0.9) color = "#ffd59e";
@@ -599,10 +631,12 @@ function updateTotalColor(total) {
     totalDiv.style.color = "#0d3b66";
 }
 
+// ======= ESCAPE HTML =======
 function escapeHtml(text) {
     return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 
+// ======= INIT =======
 (function init() {
     selectedGames = [...new Set(selectedGames.filter(i => i >= 0 && i < games.length))];
     renderTable();
