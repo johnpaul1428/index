@@ -1,68 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PC GAME List — Owned by Jay Pee</title>
-<meta name="author" content="Jay Pee">
-<meta name="description" content="PC game list selector for 500GB (450GB usable) external HDD. Add games to your selection until the 450GB limit.">
+<meta name="author" content="Jay Pee" />
+<meta name="description" content="PC game list selector for 500GB (450GB usable) external HDD. Add games to your selection until the 450GB limit." />
 <link rel="icon" href="data:,">
 <style>
-    * { box-sizing: border-box; margin:0; padding:0; }
-    body { font-family:'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color:#f9f9fb; color:#1f2937; line-height:1.5; }
-
-    .siteHeader { display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background-color:#1e3a8a; color:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
-    .siteTitle { display:flex; align-items:center; gap:12px; font-size:22px; font-weight:700; }
-    .ownerBadge { background:rgba(255,255,255,0.15); padding:6px 12px; border-radius:999px; font-size:13px; font-weight:500; }
-
-    #topPanel { position:sticky; top:0; z-index:99; padding:16px 24px; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.06); display:flex; flex-direction:column; gap:14px; }
-    #searchBar { width:100%; padding:12px 16px; font-size:16px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s; }
-    #searchBar:focus { outline:none; border-color:#1e3a8a; box-shadow:0 0 8px rgba(30,58,138,0.25); }
-
-    .infoRow { display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; align-items:center; }
-    .total, .counter { flex:1 1 45%; min-width:140px; padding:10px 16px; border-radius:8px; font-weight:600; background:#f3f4f6; color:#1f2937; border:1px solid #cbd5e1; text-align:center; transition:all 0.3s; }
-    #toggleList { flex:1 1 45%; min-width:160px; padding:12px 20px; font-weight:600; border:none; border-radius:8px; cursor:pointer; color:#fff; background:linear-gradient(135deg,#1e3a8a,#3b82f6); display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 8px rgba(0,0,0,0.08); transition:all 0.25s ease; }
-    #toggleList:hover { transform:translateY(-2px); background:linear-gradient(135deg,#3b82f6,#1e3a8a); box-shadow:0 6px 12px rgba(0,0,0,0.12); }
-    #toggleList .arrow { transition:transform 0.25s ease; }
-    #toggleList[aria-expanded="true"] .arrow { transform:rotate(180deg); }
-
-    .selectedGames { display:none; flex-direction:column; gap:10px; padding:12px; border-radius:8px; border:1px solid #cbd5e1; background:#f9fafb; max-height:70vh; overflow-y:auto; }
-    .selectedGames ul { list-style:none; width:100%; padding-left:0; }
-    .selectedGames li { display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:14px; gap:8px; }
-    .selectedGames li .meta { font-size:13px; color:#6b7280; }
-    .selectedGames button.removeBtn, .clearAllBtn { background-color:#ef4444; color:#fff; border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; }
-    .selectedGames button.removeBtn:hover, .clearAllBtn:hover { background-color:#b91c1c; transform:translateY(-1px); }
-    .clearAllBtn { display:none; width:fit-content; margin-top:8px; }
-    .smallNote { font-size:12px; color:#6b7280; margin-top:4px; }
-
-    table { width:100%; border-collapse:collapse; margin-top:18px; border-radius:8px; overflow:hidden; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
-    th, td { padding:12px 16px; text-align:center; border-bottom:1px solid #e5e7eb; border-right:1px solid #e5e7eb; vertical-align:middle; }
-    th:last-child, td:last-child { border-right:none; }
-    th { background:#1e3a8a; color:#fff; font-weight:600; cursor:pointer; }
-    th .sortArrow { margin-left:6px; font-size:12px; transition:transform 0.2s; }
-    tr:hover { background:#f3f4f6; }
-    input[type="checkbox"] { transform:scale(1.2); cursor:pointer; }
-    td.titleCell { text-align:left; font-weight:600; color:#1e3a8a; }
-
-    footer { margin-top:20px; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:#f3f4f6; border-top:1px solid #e5e7eb; }
-    .ownerRight { font-size:13px; color:#1f2937; font-weight:500; }
-    .copyright { font-size:13px; color:#6b7280; }
-
-    @media(max-width:768px){
-        #topPanel .infoRow { flex-direction:column; gap:8px; }
-        .total, .counter, #toggleList { flex:1 1 100%; }
-        th, td { padding:10px; font-size:14px; }
-        .siteTitle { font-size:18px; gap:8px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #ffffff;
+        color: #0d3b66;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
-
-    /* Scroll Buttons */
-    .scrollBtn { position:fixed; right:20px; padding:10px 14px; border:none; border-radius:50%; background:#1e3a8a; color:#fff; font-size:18px; cursor:pointer; box-shadow:0 4px 8px rgba(0,0,0,0.15); display:none; z-index:999; transition:all 0.3s; }
-    .scrollBtn:hover { background:#3b82f6; transform:translateY(-2px); }
-    #scrollTopBtn { bottom:80px; }
-    #scrollBottomBtn { bottom:20px; }
+    .siteHeader {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding: 14px 18px;
+        background: linear-gradient(90deg,#0d3b66,#073763);
+        color: #fff;
+        border-bottom: 2px solid rgba(0,0,0,0.08);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .siteTitle {
+        display:flex;
+        align-items:center;
+        gap:12px;
+        font-size:20px;
+        font-weight:700;
+    }
+    .ownerBadge {
+        background: rgba(255,255,255,0.12);
+        color: #fff;
+        padding:6px 10px;
+        border-radius: 999px;
+        font-size:12px;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+    #topPanel {
+        position: sticky;
+        top: 0;
+        background-color: #f0f4f8;
+        z-index: 999;
+        padding: 12px 16px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    #searchBar {
+        width: 100%;
+        padding: 10px 15px;
+        font-size: 16px;
+        border: 1.5px solid #0d3b66;
+        border-radius: 8px;
+        transition: 0.18s;
+    }
+    #searchBar:focus {
+        border-color: #073763;
+        outline: none;
+        box-shadow: 0 0 6px rgba(13,59,102,0.28);
+    }
+    .infoRow {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .total, .counter {
+        background-color: #e9fff1;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        border: 1.5px solid #0d3b66;
+        color: #0d3b66;
+        text-align: center;
+        flex: 1 1 45%;
+        min-width: 120px;
+        transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+    }
+    #toggleList {
+        background: linear-gradient(135deg, #0d3b66, #073763);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        padding: 12px 18px;
+        transition: all 0.25s ease;
+        font-weight: 600;
+        text-align: center;
+        flex: 1 1 45%;
+        min-width: 140px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    #toggleList:hover {
+        background: linear-gradient(135deg, #073763, #0d3b66);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+    }
+    #toggleList .arrow {
+        display: inline-block;
+        transition: transform 0.25s ease;
+    }
+    #toggleList[aria-expanded="true"] .arrow {
+        transform: rotate(180deg);
+    }
+    .selectedGames {
+        display: none;
+        flex-direction: column;
+        margin-top: 5px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 10px;
+        border: 1.5px solid #0d3b66;
+        align-items: center;
+        max-height: 70vh; /* max height if the list is very long */
+        overflow-y: auto;
+        transition: max-height 0.3s ease;
+    }
+    .selectedGames ul { list-style: none; padding-left: 0; margin-top: 8px; width: 100%; }
+    .selectedGames li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 6px;
+        border-bottom: 1px solid #e1e5ea;
+        font-size: 14px;
+        gap: 8px;
+    }
+    .selectedGames li .meta { color:#4b6b88; font-size:13px; }
+    .selectedGames button.removeBtn,
+    .clearAllBtn {
+        background-color: #e53935;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .selectedGames button.removeBtn:hover,
+    .clearAllBtn:hover {
+        background-color: #b71c1c;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+    .clearAllBtn { margin-top: 10px; display: none; text-align: center; width: fit-content; }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 18px;
+        background-color: #f0f4f8;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+    }
+    th, td {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #e1e5ea;
+        border-right: 1px solid #e1e5ea;
+        vertical-align: middle;
+    }
+    th:last-child, td:last-child { border-right: none; }
+    th { background-color: #0d3b66; color: #ffffff; font-weight: 700; cursor: pointer; user-select: none; }
+    th .sortArrow { margin-left: 6px; font-size: 12px; transition: transform 0.2s ease; }
+    tr:hover { background-color: #dbe9f4; }
+    input[type="checkbox"] { transform: scale(1.14); cursor: pointer; }
+    td.titleCell { text-align: left; font-weight:600; color:#073763; }
+    .smallNote { font-size:12px; color:#4b6b88; margin-top:6px; }
+    footer {
+        margin-top: 18px;
+        padding: 14px 16px;
+        background: linear-gradient(90deg,#f7f9fb,#eef3f8);
+        border-top: 1px solid #e6eef6;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:10px;
+        flex-wrap:wrap;
+    }
+    .ownerRight { font-size:13px; color:#0d3b66; font-weight:600; }
+    .copyright { color:#4b6b88; font-size:13px; }
+    @media(max-width:768px){
+        #topPanel .infoRow { flex-direction: column; gap: 8px; }
+        .total, .counter, #toggleList { flex: 1 1 100%; }
+        .siteTitle { font-size:16px; gap:8px; }
+        th, td { padding: 10px; font-size:14px; }
+    }
 </style>
 </head>
 <body>
+
 <header class="siteHeader">
     <div class="siteTitle">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -81,7 +222,8 @@
         <div class="total" id="totalDiv">Total Size: <span id="totalSize">0 / 450 GB</span></div>
         <div class="counter">Games Added: <span id="gameCount">0</span></div>
         <button id="toggleList" aria-expanded="false">
-            <span>Show Selected Games</span> <span class="arrow">▼</span>
+            <span>Show Selected Games</span>
+            <span class="arrow">▼</span>
         </button>
     </div>
     <div class="selectedGames" id="selectedGamesDiv" aria-hidden="true">
@@ -103,20 +245,17 @@
         </thead>
         <tbody id="gameTable"></tbody>
     </table>
+
     <footer>
         <div class="copyright">© <span id="year"></span> Jay Pee — All rights reserved.</div>
         <div class="ownerRight">Owner: <strong>Jay Pee</strong> · External HDD: <strong>500GB (450GB usable)</strong></div>
     </footer>
 </main>
 
-<button class="scrollBtn" id="scrollTopBtn" title="Scroll to Top">↑</button>
-<button class="scrollBtn" id="scrollBottomBtn" title="Scroll to Bottom">↓</button>
 <script>
 const OWNER_NAME = "Jay Pee";
 const totalLimit = 450;
-let sortConfig = { key:null, ascending:true };
-
-// Games array (paste all your previous game objects here)
+let sortConfig = { key: null, ascending: true };
 const games = [
 {title:"A Quiet Place: The Road Ahead (2024)", size:38},
 {title:"A Way Out", size:22},
@@ -370,137 +509,130 @@ const searchBar = document.getElementById("searchBar");
 document.getElementById("year").textContent = new Date().getFullYear();
 document.getElementById("ownerBadge").textContent = `Owned by ${OWNER_NAME}`;
 
-// Render Table
-function renderTable(filter=""){
-    tableBody.innerHTML="";
-    let displayGames = games.map((g,i)=>({...g,index:i}));
+function renderTable(filter = "") {
+    tableBody.innerHTML = "";
+
+    let displayGames = games.map((g, idx) => ({...g, index: idx}));
+
     if(filter) displayGames = displayGames.filter(g => g.title.toLowerCase().includes(filter));
-    if(sortConfig.key){
-        displayGames.sort((a,b)=>{
+
+    if(sortConfig.key) {
+        displayGames.sort((a,b) => {
             let valA = a[sortConfig.key], valB = b[sortConfig.key];
-            if(sortConfig.key==="title"){ valA=valA.toLowerCase(); valB=valB.toLowerCase(); }
-            return sortConfig.ascending?(valA>valB?1:-1):(valA<valB?1:-1);
+            if(sortConfig.key === "title") { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
+            return sortConfig.ascending ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
         });
     }
-    displayGames.forEach(game=>{
+
+    displayGames.forEach(game => {
         const tr = document.createElement("tr");
-        const cbId = `cb-${game.index}`;
+        const checkboxId = `cb-${game.index}`;
         tr.innerHTML = `
-            <td><input id="${cbId}" type="checkbox" /></td>
+            <td><input id="${checkboxId}" type="checkbox" /></td>
             <td class="titleCell">${escapeHtml(game.title)}</td>
-            <td>${Number(game.size).toFixed(2)} GB</td>`;
+            <td>${Number(game.size).toFixed(2)} GB</td>
+        `;
         tableBody.appendChild(tr);
         const cb = tr.querySelector("input");
         cb.checked = selectedGames.includes(game.index);
-        cb.addEventListener("change",()=>onToggleRequest(game.index,cb));
+        cb.addEventListener("change", () => onToggleRequest(game.index, cb));
     });
     updateSelectedGamesUI();
 }
 
-function onToggleRequest(index, checkbox){
+function onToggleRequest(index, checkboxEl) {
     const total = computeSelectedTotal();
     const size = Number(games[index].size);
-    if(checkbox.checked){
-        if(total+size>totalLimit){ showTemporaryWarning(`⚠️ Exceeds 450GB limit! Select a smaller game.`); checkbox.checked=false; return; }
-        if(!selectedGames.includes(index)) selectedGames.push(index);
-    }else{ selectedGames = selectedGames.filter(i=>i!==index); }
+    if (checkboxEl.checked) {
+        if (total + size > totalLimit) {
+            showTemporaryWarning(`⚠️ Exceeds 450GB limit! Select a smaller game.`);
+            checkboxEl.checked = false;
+            return;
+        }
+        if (!selectedGames.includes(index)) selectedGames.push(index);
+    } else {
+        selectedGames = selectedGames.filter(i => i !== index);
+    }
     saveSelectedToStorage();
     updateSelectedGamesUI();
 }
 
-function removeGame(index){ selectedGames = selectedGames.filter(i=>i!==index); saveSelectedToStorage(); renderTable(searchBar.value.trim().toLowerCase()); }
-function clearAllGames(){ selectedGames=[]; saveSelectedToStorage(); renderTable(searchBar.value.trim().toLowerCase()); }
+function removeGame(index) { selectedGames = selectedGames.filter(i => i !== index); saveSelectedToStorage(); renderTable(searchBar.value.trim().toLowerCase()); }
+function clearAllGames() { selectedGames = []; saveSelectedToStorage(); renderTable(searchBar.value.trim().toLowerCase()); }
 
-function updateSelectedGamesUI(){
-    selectedGamesList.innerHTML="";
+function updateSelectedGamesUI() {
+    selectedGamesList.innerHTML = "";
     const total = computeSelectedTotal();
-    totalDiv.innerHTML=`Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
-    selectedGames.forEach(i=>{
-        const li=document.createElement("li");
-        li.innerHTML=`<span style="flex:1 1 auto;">📌 ${escapeHtml(games[i].title)}</span><span class="meta">${games[i].size.toFixed(2)} GB</span><button class="removeBtn">Remove</button>`;
-        li.querySelector(".removeBtn").addEventListener("click",()=>removeGame(i));
+    totalDiv.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
+    selectedGames.forEach(i => {
+        const li = document.createElement("li");
+        li.innerHTML = `<span style="flex:1 1 auto;">📌 ${escapeHtml(games[i].title)}</span>
+            <span class="meta">${games[i].size.toFixed(2)} GB</span>
+            <button class="removeBtn">Remove</button>`;
+        li.querySelector(".removeBtn").addEventListener("click", () => removeGame(i));
         selectedGamesList.appendChild(li);
     });
     gameCount.textContent = selectedGames.length;
-    clearAllBtn.style.display = selectedGames.length>0?"inline-block":"none";
+    clearAllBtn.style.display = selectedGames.length > 0 ? "inline-block" : "none";
     updateTotalColor(total);
 }
 
-function computeSelectedTotal(){ return selectedGames.reduce((sum,i)=>sum+(games[i].size||0),0); }
+function computeSelectedTotal() { return selectedGames.reduce((sum, i) => sum + (games[i].size || 0), 0); }
 
-toggleButton.addEventListener("click",()=>{
-    const isHidden = selectedGamesDiv.style.display==="none" || selectedGamesDiv.style.display==="";
-    selectedGamesDiv.style.display=isHidden?"flex":"none";
-    toggleButton.setAttribute("aria-expanded",isHidden);
-    toggleButton.querySelector("span:first-child").textContent=isHidden?"Hide Selected Games":"Show Selected Games";
+toggleButton.addEventListener("click", () => {
+    const isHidden = selectedGamesDiv.style.display === "none" || selectedGamesDiv.style.display === "";
+    selectedGamesDiv.style.display = isHidden ? "flex" : "none";
+    toggleButton.setAttribute("aria-expanded", isHidden);
+    toggleButton.querySelector("span:first-child").textContent = isHidden ? "Hide Selected Games" : "Show Selected Games";
 });
 
-searchBar.addEventListener("input",()=>renderTable(searchBar.value.trim().toLowerCase()));
-clearAllBtn.addEventListener("click",()=>{ if(confirm("Clear all selected games?")) clearAllGames(); });
+searchBar.addEventListener("input", () => renderTable(searchBar.value.trim().toLowerCase()));
+clearAllBtn.addEventListener("click", () => { if (confirm("Clear all selected games?")) clearAllGames(); });
 
-function saveSelectedToStorage(){ localStorage.setItem("pg_selected_v1",JSON.stringify(selectedGames)); }
-function loadSelectedFromStorage(){ const d=localStorage.getItem("pg_selected_v1"); try{return d?JSON.parse(d):[]}catch{return []} }
+function saveSelectedToStorage() { localStorage.setItem("pg_selected_v1", JSON.stringify(selectedGames)); }
+function loadSelectedFromStorage() { const d = localStorage.getItem("pg_selected_v1"); try { return d ? JSON.parse(d) : [] } catch { return []; } }
 
-let warningTimeout=null;
-function showTemporaryWarning(msg,duration=3000){
-    const original=totalDiv.innerHTML;
-    totalDiv.style.backgroundColor="#fee2e2"; totalDiv.style.borderColor="#dc2626"; totalDiv.style.color="#dc2626";
-    totalDiv.innerHTML=`<strong>${escapeHtml(msg)}</strong>`;
-    if(warningTimeout) clearTimeout(warningTimeout);
-    warningTimeout=setTimeout(()=>{ updateSelectedGamesUI(); warningTimeout=null; },duration);
+let warningTimeout = null;
+function showTemporaryWarning(msg, duration = 3000) {
+    const original = totalDiv.innerHTML;
+    totalDiv.style.backgroundColor = "#ffe6e6";  
+    totalDiv.style.borderColor = "#cc0000";      
+    totalDiv.style.color = "#cc0000";            
+    totalDiv.innerHTML = `<strong>${escapeHtml(msg)}</strong>`;
+    if (warningTimeout) clearTimeout(warningTimeout);
+    warningTimeout = setTimeout(() => { updateSelectedGamesUI(); warningTimeout = null; }, duration);
 }
 
-function updateTotalColor(total){
-    const ratio=total/totalLimit;
-    let color="#f3f4f6";
-    if(ratio<0.5) color="#d1fae5";
-    else if(ratio<0.75) color="#fef3c7";
-    else if(ratio<0.9) color="#fed7aa";
-    else color="#fecaca";
-    totalDiv.style.backgroundColor=color;
-    totalDiv.style.borderColor="#cbd5e1";
-    totalDiv.style.color="#1f2937";
+function updateTotalColor(total) {
+    const ratio = total / totalLimit;
+    let color = "#e9fff1";
+    if (ratio < 0.5) color = "#b7f0b1";
+    else if (ratio < 0.75) color = "#fff7b0";
+    else if (ratio < 0.9) color = "#ffd59e";
+    else color = "#ffb3a1";
+    totalDiv.style.backgroundColor = color;
+    totalDiv.style.borderColor = "#0d3b66";
+    totalDiv.style.color = "#0d3b66";
 }
 
-function escapeHtml(text){ return text.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+function escapeHtml(text) { return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
-document.querySelectorAll('th[data-sort]').forEach(th=>{
-    th.addEventListener('click',()=>{
-        const key=th.getAttribute('data-sort');
-        if(sortConfig.key===key) sortConfig.ascending=!sortConfig.ascending;
-        else { sortConfig.key=key; sortConfig.ascending=true; }
-        document.querySelectorAll('.sortArrow').forEach(a=>a.textContent='⇅');
-        th.querySelector('.sortArrow').textContent=sortConfig.ascending?'↑':'↓';
+document.querySelectorAll('th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+        const key = th.getAttribute('data-sort');
+        if(sortConfig.key === key) sortConfig.ascending = !sortConfig.ascending;
+        else { sortConfig.key = key; sortConfig.ascending = true; }
+        document.querySelectorAll('.sortArrow').forEach(a => a.textContent = '⇅');
+        th.querySelector('.sortArrow').textContent = sortConfig.ascending ? '↑' : '↓';
         renderTable(searchBar.value.trim().toLowerCase());
     });
 });
 
-(function init(){ selectedGames=[...new Set(selectedGames.filter(i=>i>=0 && i<games.length))]; renderTable(); })();
-
-// SCROLL BUTTONS
-const scrollTopBtn = document.getElementById("scrollTopBtn");
-const scrollBottomBtn = document.getElementById("scrollBottomBtn");
-
-window.addEventListener("scroll", toggleScrollButtons);
-
-function toggleScrollButtons() {
-    const scrollY = window.scrollY || document.documentElement.scrollTop;
-    const tableTop = tableBody.offsetTop;
-    const tableBottom = tableTop + tableBody.offsetHeight - window.innerHeight;
-    scrollTopBtn.style.display = scrollY > tableTop + 100 ? "block" : "none";
-    scrollBottomBtn.style.display = scrollY < tableBottom - 100 ? "block" : "none";
-}
-
-scrollTopBtn.addEventListener("click", () => {
-    window.scrollTo({ top:0, behavior:"smooth" });
-    scrollTopBtn.style.display="none";
-});
-scrollBottomBtn.addEventListener("click", () => {
-    window.scrollTo({ top:document.body.scrollHeight, behavior:"smooth" });
-    scrollBottomBtn.style.display="none";
-});
-
-toggleScrollButtons();
+(function init() {
+    selectedGames = [...new Set(selectedGames.filter(i => i >= 0 && i < games.length))];
+    renderTable();
+})();
 </script>
+
 </body>
 </html>
