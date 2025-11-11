@@ -104,11 +104,13 @@
         border-radius: 8px;
         padding: 10px;
         border: 1.5px solid #0d3b66;
+        align-items: center;
     }
     .selectedGames ul {
         list-style: none;
         padding-left: 0;
         margin-top: 5px;
+        width: 100%;
     }
     .selectedGames li {
         display: flex;
@@ -135,9 +137,9 @@
         background-color: #073763;
     }
     .clearAllBtn {
-        margin-top: 5px;
+        margin-top: 10px;
         display: none;
-        align-self: flex-end;
+        text-align: center;
     }
 
     /* ===== Table ===== */
@@ -154,6 +156,10 @@
         padding: 12px 15px;
         text-align: center;
         border-bottom: 1px solid #e1e5ea;
+        border-right: 1px solid #e1e5ea;
+    }
+    th:last-child, td:last-child {
+        border-right: none;
     }
     th {
         background-color: #0d3b66;
