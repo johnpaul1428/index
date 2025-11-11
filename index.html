@@ -73,7 +73,7 @@
         gap: 10px;
     }
     .total, .counter {
-        background-color: #ffffff;
+        background-color: #e9fff1; /* light green start */
         padding: 10px 15px;
         border-radius: 8px;
         font-weight: 600;
@@ -82,7 +82,7 @@
         text-align: center;
         flex: 1 1 45%;
         min-width: 120px;
-        transition: 0.3s;
+        transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
     }
     #toggleList {
         background-color: #0d3b66;
@@ -228,9 +228,11 @@
 </main>
 
 <script>
+// ======= SETTINGS =======
 const OWNER_NAME = "Jay Pee";
 const totalLimit = 450;
 
+// ======= GAMES (shortened for brevity) =======
 const games = [
 {title:"A Quiet Place: The Road Ahead (2024)", size:38},
 {title:"A Way Out", size:22},
@@ -471,7 +473,6 @@ const games = [
 ];
 
 let selectedGames = loadSelectedFromStorage();
-
 const tableBody = document.getElementById("gameTable");
 const gameCount = document.getElementById("gameCount");
 const selectedGamesList = document.getElementById("selectedGamesList");
@@ -479,28 +480,23 @@ const selectedGamesDiv = document.getElementById("selectedGamesDiv");
 const toggleButton = document.getElementById("toggleList");
 const clearAllBtn = document.getElementById("clearAllBtn");
 const totalDiv = document.getElementById("totalDiv");
-const totalSizeSpan = document.getElementById("totalSize");
 const searchBar = document.getElementById("searchBar");
-const ownerBadge = document.getElementById("ownerBadge");
 document.getElementById("year").textContent = new Date().getFullYear();
-ownerBadge.textContent = `Owned by ${OWNER_NAME}`;
+document.getElementById("ownerBadge").textContent = `Owned by ${OWNER_NAME}`;
 
 function renderTable(filter = "") {
     tableBody.innerHTML = "";
     games.forEach((game, index) => {
-        const titleLower = game.title.toLowerCase();
-        if (filter && !titleLower.includes(filter)) return;
-
+        if (filter && !game.title.toLowerCase().includes(filter)) return;
         const tr = document.createElement("tr");
         const checkboxId = `cb-${index}`;
         tr.innerHTML = `
-            <td><input id="${checkboxId}" type="checkbox" aria-label="Select ${escapeHtml(game.title)}" /></td>
+            <td><input id="${checkboxId}" type="checkbox" /></td>
             <td class="titleCell">${escapeHtml(game.title)}</td>
             <td>${Number(game.size).toFixed(2)} GB</td>
         `;
         tableBody.appendChild(tr);
-
-        const cb = tr.querySelector("input[type='checkbox']");
+        const cb = tr.querySelector("input");
         cb.checked = selectedGames.includes(index);
         cb.addEventListener("change", () => onToggleRequest(index, cb));
     });
@@ -508,21 +504,18 @@ function renderTable(filter = "") {
 }
 
 function onToggleRequest(index, checkboxEl) {
-    const currentlySelectedTotal = computeSelectedTotal();
-    const gameSize = Number(games[index].size) || 0;
-
+    const total = computeSelectedTotal();
+    const size = Number(games[index].size);
     if (checkboxEl.checked) {
-        if (currentlySelectedTotal + gameSize > totalLimit) {
-            showTemporaryWarning(`⚠️ Your selected games exceed the 450GB limit.`);
+        if (total + size > totalLimit) {
+            showTemporaryWarning(`⚠️ Selected game exceeds 450GB limit! Please select a smaller game.`);
             checkboxEl.checked = false;
             return;
-        } else {
-            if (!selectedGames.includes(index)) selectedGames.push(index);
         }
+        if (!selectedGames.includes(index)) selectedGames.push(index);
     } else {
         selectedGames = selectedGames.filter(i => i !== index);
     }
-
     saveSelectedToStorage();
     updateSelectedGamesUI();
 }
@@ -542,46 +535,23 @@ function clearAllGames() {
 function updateSelectedGamesUI() {
     selectedGamesList.innerHTML = "";
     const total = computeSelectedTotal();
-    totalSizeSpan.textContent = `${total.toFixed(2)} / ${totalLimit} GB`;
-
-    // Update color: green -> yellow -> red
-    if (total / totalLimit < 0.7) {
-        totalDiv.style.color = "#0a9d58"; // green
-        totalDiv.style.borderColor = "#0a9d58";
-        totalDiv.style.backgroundColor = "#e6f4ea";
-    } else if (total / totalLimit < 1) {
-        totalDiv.style.color = "#b38f00"; // yellow
-        totalDiv.style.borderColor = "#b38f00";
-        totalDiv.style.backgroundColor = "#fff8e1";
-    } else {
-        totalDiv.style.color = "#d93025"; // red
-        totalDiv.style.borderColor = "#d93025";
-        totalDiv.style.backgroundColor = "#fdecea";
-    }
-
+    totalDiv.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
     selectedGames.forEach(i => {
         const li = document.createElement("li");
-        const titleSpan = document.createElement("span");
-        titleSpan.innerHTML = `📌 ${escapeHtml(games[i].title)}`;
-        titleSpan.style.flex = "1 1 auto";
-        const meta = document.createElement("span");
-        meta.className = "meta";
-        meta.textContent = `${Number(games[i].size).toFixed(2)} GB`;
-        const removeBtn = document.createElement("button");
-        removeBtn.textContent = "Remove";
-        removeBtn.className = "removeBtn";
-        removeBtn.addEventListener("click", () => removeGame(i));
-        li.appendChild(titleSpan);
-        li.appendChild(meta);
-        li.appendChild(removeBtn);
+        li.innerHTML = `
+            <span style="flex:1 1 auto;">📌 ${escapeHtml(games[i].title)}</span>
+            <span class="meta">${games[i].size.toFixed(2)} GB</span>
+            <button class="removeBtn">Remove</button>`;
+        li.querySelector(".removeBtn").addEventListener("click", () => removeGame(i));
         selectedGamesList.appendChild(li);
     });
     gameCount.textContent = selectedGames.length;
     clearAllBtn.style.display = selectedGames.length > 0 ? "inline-block" : "none";
+    updateTotalColor(total);
 }
 
 function computeSelectedTotal() {
-    return selectedGames.reduce((acc, i) => acc + (Number(games[i].size) || 0), 0);
+    return selectedGames.reduce((sum, i) => sum + (games[i].size || 0), 0);
 }
 
 toggleButton.addEventListener("click", () => {
@@ -589,35 +559,24 @@ toggleButton.addEventListener("click", () => {
     selectedGamesDiv.style.display = isHidden ? "flex" : "none";
     toggleButton.textContent = isHidden ? "Hide Selected Games" : "Show Selected Games";
 });
-
-searchBar.addEventListener("input", function () {
-    const filter = this.value.trim().toLowerCase();
-    renderTable(filter);
-});
-
-clearAllBtn.addEventListener("click", () => {
-    if (confirm("Clear all selected games?")) clearAllGames();
-});
+searchBar.addEventListener("input", () => renderTable(searchBar.value.trim().toLowerCase()));
+clearAllBtn.addEventListener("click", () => { if (confirm("Clear all selected games?")) clearAllGames(); });
 
 function saveSelectedToStorage() {
-    try { localStorage.setItem("pg_selected_v1", JSON.stringify(selectedGames)); } catch (err) { console.warn(err); }
+    localStorage.setItem("pg_selected_v1", JSON.stringify(selectedGames));
 }
 function loadSelectedFromStorage() {
-    try {
-        const data = localStorage.getItem("pg_selected_v1");
-        if (!data) return [];
-        const parsed = JSON.parse(data);
-        if (Array.isArray(parsed)) return parsed.filter(i => Number.isInteger(i) && i >= 0 && i < games.length);
-    } catch (err) { }
-    return [];
+    const d = localStorage.getItem("pg_selected_v1");
+    if (!d) return [];
+    try { const arr = JSON.parse(d); return Array.isArray(arr) ? arr : []; } catch { return []; }
 }
 
 let warningTimeout = null;
 function showTemporaryWarning(msg, duration = 3000) {
     const original = totalDiv.innerHTML;
-    totalDiv.style.backgroundColor = "#fdecea";
-    totalDiv.style.borderColor = "#d93025";
-    totalDiv.style.color = "#d93025";
+    totalDiv.style.backgroundColor = "#fff4e5";
+    totalDiv.style.borderColor = "#f1b25a";
+    totalDiv.style.color = "#8a4b00";
     totalDiv.innerHTML = `<strong>${escapeHtml(msg)}</strong>`;
     if (warningTimeout) clearTimeout(warningTimeout);
     warningTimeout = setTimeout(() => {
@@ -626,19 +585,27 @@ function showTemporaryWarning(msg, duration = 3000) {
     }, duration);
 }
 
+// 🎨 Dynamic Color Logic for TotalDiv
+function updateTotalColor(total) {
+    const ratio = total / totalLimit;
+    let color = "#e9fff1"; // default light green
+    if (ratio < 0.5) color = "#b7f0b1";      // light green
+    else if (ratio < 0.75) color = "#fff7b0"; // yellow
+    else if (ratio < 0.9) color = "#ffd59e";  // orange
+    else color = "#ffb3a1";                   // redish
+
+    totalDiv.style.backgroundColor = color;
+    totalDiv.style.borderColor = "#0d3b66";
+    totalDiv.style.color = "#0d3b66";
+}
+
 function escapeHtml(text) {
-    return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 
 (function init() {
-    selectedGames = Array.from(new Set(selectedGames.filter(i => Number.isInteger(i) && i >= 0 && i < games.length)));
+    selectedGames = [...new Set(selectedGames.filter(i => i >= 0 && i < games.length))];
     renderTable();
-    selectedGamesDiv.style.display = "none";
 })();
 </script>
 
