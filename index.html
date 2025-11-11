@@ -73,7 +73,7 @@
         gap: 10px;
     }
     .total, .counter {
-        background-color: #e9fff1;
+        background-color: #e9fff1; /* light green start */
         padding: 10px 15px;
         border-radius: 8px;
         font-weight: 600;
@@ -98,21 +98,12 @@
         flex: 1 1 45%;
         min-width: 140px;
         box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
     }
     #toggleList:hover {
         background: linear-gradient(135deg, #073763, #0d3b66);
         transform: translateY(-2px);
         box-shadow: 0 6px 12px rgba(0,0,0,0.12);
     }
-    #toggleArrow {
-        display: inline-block;
-        transition: transform 0.3s ease;
-    }
-
     .selectedGames {
         display: none;
         flex-direction: column;
@@ -136,7 +127,6 @@
         gap: 8px;
     }
     .selectedGames li .meta { color:#4b6b88; font-size:13px; }
-
     .selectedGames button.removeBtn,
     .clearAllBtn {
         background-color: #e53935;
@@ -162,7 +152,6 @@
         text-align: center;
         width: fit-content;
     }
-
     table {
         width: 100%;
         border-collapse: collapse;
@@ -198,6 +187,7 @@
     }
     .ownerRight { font-size:13px; color:#0d3b66; font-weight:600; }
     .copyright { color:#4b6b88; font-size:13px; }
+    .fitBadge { font-weight:600; }
     @media(max-width:768px){
         #topPanel .infoRow { flex-direction: column; gap: 8px; }
         .total, .counter, #toggleList { flex: 1 1 100%; }
@@ -225,10 +215,7 @@
     <div class="infoRow">
         <div class="total" id="totalDiv">Total Size: <span id="totalSize">0 / 450 GB</span></div>
         <div class="counter">Games Added: <span id="gameCount">0</span></div>
-        <button id="toggleList" aria-expanded="false">
-            <span id="toggleText">Show Selected Games</span>
-            <span id="toggleArrow">⬇️</span>
-        </button>
+        <button id="toggleList" aria-expanded="false">Show Selected Games ▼</button>
     </div>
     <div class="selectedGames" id="selectedGamesDiv" aria-hidden="true">
         <strong>Selected Games:</strong>
@@ -507,8 +494,6 @@ const gameCount = document.getElementById("gameCount");
 const selectedGamesList = document.getElementById("selectedGamesList");
 const selectedGamesDiv = document.getElementById("selectedGamesDiv");
 const toggleButton = document.getElementById("toggleList");
-const toggleArrow = document.getElementById("toggleArrow");
-const toggleText = document.getElementById("toggleText");
 const clearAllBtn = document.getElementById("clearAllBtn");
 const totalDiv = document.getElementById("totalDiv");
 const searchBar = document.getElementById("searchBar");
@@ -532,6 +517,7 @@ function renderTable(filter = "") {
         cb.addEventListener("change", () => onToggleRequest(index, cb));
     });
     updateSelectedGamesUI();
+    updateSmartSuggestions();
 }
 
 function onToggleRequest(index, checkboxEl) {
@@ -539,7 +525,7 @@ function onToggleRequest(index, checkboxEl) {
     const size = Number(games[index].size);
     if (checkboxEl.checked) {
         if (total + size > totalLimit) {
-            showTemporaryWarning(`⚠️ Selected game exceeds 450GB limit! Please select a smaller game.`);
+            showTemporaryWarning(`⚠️ Exceeds 450GB limit! Select a smaller games.`);
             checkboxEl.checked = false;
             return;
         }
@@ -549,6 +535,7 @@ function onToggleRequest(index, checkboxEl) {
     }
     saveSelectedToStorage();
     updateSelectedGamesUI();
+    updateSmartSuggestions();
 }
 
 function removeGame(index) {
@@ -585,12 +572,10 @@ function computeSelectedTotal() {
     return selectedGames.reduce((sum, i) => sum + (games[i].size || 0), 0);
 }
 
-// Toggle Selected Games with arrow rotation
 toggleButton.addEventListener("click", () => {
     const isHidden = selectedGamesDiv.style.display === "none" || selectedGamesDiv.style.display === "";
     selectedGamesDiv.style.display = isHidden ? "flex" : "none";
-    toggleText.textContent = isHidden ? "Hide Selected Games" : "Show Selected Games";
-    toggleArrow.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
+    toggleButton.textContent = isHidden ? "Hide Selected Games ▲" : "Show Selected Games ▼";
 });
 
 searchBar.addEventListener("input", () => renderTable(searchBar.value.trim().toLowerCase()));
@@ -621,7 +606,7 @@ function showTemporaryWarning(msg, duration = 3000) {
 
 function updateTotalColor(total) {
     const ratio = total / totalLimit;
-    let color = "#e9fff1";
+    let color = "#e9fff1"; // default light green
     if (ratio < 0.5) color = "#b7f0b1";
     else if (ratio < 0.75) color = "#fff7b0";
     else if (ratio < 0.9) color = "#ffd59e";
@@ -633,6 +618,31 @@ function updateTotalColor(total) {
 
 function escapeHtml(text) {
     return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+// ===== SMART SUGGESTION BADGES =====
+function updateSmartSuggestions() {
+    const totalUsed = computeSelectedTotal();
+    const remaining = totalLimit - totalUsed;
+    games.forEach((game, index) => {
+        const row = document.getElementById(`cb-${index}`)?.closest('tr');
+        if (!row) return;
+        let badge = row.querySelector('.fitBadge');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'fitBadge';
+            badge.style.marginLeft = '8px';
+            badge.style.fontSize = '12px';
+            row.querySelector('td.titleCell').appendChild(badge);
+        }
+        if (game.size <= remaining) {
+            badge.textContent = '✅ Can Fit!';
+            badge.style.color = 'green';
+        } else {
+            badge.textContent = '⚠️ Too Big';
+            badge.style.color = 'red';
+        }
+    });
 }
 
 (function init() {
