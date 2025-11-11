@@ -85,6 +85,7 @@
         transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
     }
 
+    /* ===== Show Selected Games button with arrow ===== */
     #toggleList {
         background: linear-gradient(135deg, #0d3b66, #073763);
         color: #fff;
@@ -98,12 +99,24 @@
         flex: 1 1 45%;
         min-width: 140px;
         box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
     }
     #toggleList:hover {
         background: linear-gradient(135deg, #073763, #0d3b66);
         transform: translateY(-2px);
         box-shadow: 0 6px 12px rgba(0,0,0,0.12);
     }
+    #toggleList .arrow {
+        display: inline-block;
+        transition: transform 0.25s ease;
+    }
+    #toggleList[aria-expanded="true"] .arrow {
+        transform: rotate(180deg);
+    }
+
     .selectedGames {
         display: none;
         flex-direction: column;
@@ -127,9 +140,11 @@
         gap: 8px;
     }
     .selectedGames li .meta { color:#4b6b88; font-size:13px; }
+
+    /* ===== Remove & Clear All Buttons ===== */
     .selectedGames button.removeBtn,
     .clearAllBtn {
-        background-color: #e53935;
+        background-color: #e53935; /* red */
         color: #fff;
         border: none;
         border-radius: 6px;
@@ -152,6 +167,7 @@
         text-align: center;
         width: fit-content;
     }
+
     table {
         width: 100%;
         border-collapse: collapse;
@@ -187,7 +203,6 @@
     }
     .ownerRight { font-size:13px; color:#0d3b66; font-weight:600; }
     .copyright { color:#4b6b88; font-size:13px; }
-    .fitBadge { font-weight:600; }
     @media(max-width:768px){
         #topPanel .infoRow { flex-direction: column; gap: 8px; }
         .total, .counter, #toggleList { flex: 1 1 100%; }
@@ -215,7 +230,10 @@
     <div class="infoRow">
         <div class="total" id="totalDiv">Total Size: <span id="totalSize">0 / 450 GB</span></div>
         <div class="counter">Games Added: <span id="gameCount">0</span></div>
-        <button id="toggleList" aria-expanded="false">Show Selected Games ▼</button>
+        <button id="toggleList" aria-expanded="false">
+            <span>Show Selected Games</span>
+            <span class="arrow">▼</span>
+        </button>
     </div>
     <div class="selectedGames" id="selectedGamesDiv" aria-hidden="true">
         <strong>Selected Games:</strong>
@@ -244,11 +262,8 @@
 </main>
 
 <script>
-// ======= SETTINGS =======
 const OWNER_NAME = "Jay Pee";
 const totalLimit = 450;
-
-// ======= GAMES LIST =======
 const games = [
 {title:"A Quiet Place: The Road Ahead (2024)", size:38},
 {title:"A Way Out", size:22},
@@ -489,6 +504,7 @@ const games = [
 ];
 
 let selectedGames = loadSelectedFromStorage();
+
 const tableBody = document.getElementById("gameTable");
 const gameCount = document.getElementById("gameCount");
 const selectedGamesList = document.getElementById("selectedGamesList");
@@ -497,6 +513,7 @@ const toggleButton = document.getElementById("toggleList");
 const clearAllBtn = document.getElementById("clearAllBtn");
 const totalDiv = document.getElementById("totalDiv");
 const searchBar = document.getElementById("searchBar");
+
 document.getElementById("year").textContent = new Date().getFullYear();
 document.getElementById("ownerBadge").textContent = `Owned by ${OWNER_NAME}`;
 
@@ -517,7 +534,6 @@ function renderTable(filter = "") {
         cb.addEventListener("change", () => onToggleRequest(index, cb));
     });
     updateSelectedGamesUI();
-    updateSmartSuggestions();
 }
 
 function onToggleRequest(index, checkboxEl) {
@@ -525,7 +541,7 @@ function onToggleRequest(index, checkboxEl) {
     const size = Number(games[index].size);
     if (checkboxEl.checked) {
         if (total + size > totalLimit) {
-            showTemporaryWarning(`⚠️ Exceeds 450GB limit! Select a smaller games.`);
+            showTemporaryWarning(`⚠️ Selected game exceeds 450GB limit! Please select a smaller game.`);
             checkboxEl.checked = false;
             return;
         }
@@ -535,7 +551,6 @@ function onToggleRequest(index, checkboxEl) {
     }
     saveSelectedToStorage();
     updateSelectedGamesUI();
-    updateSmartSuggestions();
 }
 
 function removeGame(index) {
@@ -572,10 +587,12 @@ function computeSelectedTotal() {
     return selectedGames.reduce((sum, i) => sum + (games[i].size || 0), 0);
 }
 
+// Toggle list with arrow rotation
 toggleButton.addEventListener("click", () => {
     const isHidden = selectedGamesDiv.style.display === "none" || selectedGamesDiv.style.display === "";
     selectedGamesDiv.style.display = isHidden ? "flex" : "none";
-    toggleButton.textContent = isHidden ? "Hide Selected Games ▲" : "Show Selected Games ▼";
+    toggleButton.setAttribute("aria-expanded", isHidden);
+    toggleButton.querySelector("span:first-child").textContent = isHidden ? "Hide Selected Games" : "Show Selected Games";
 });
 
 searchBar.addEventListener("input", () => renderTable(searchBar.value.trim().toLowerCase()));
@@ -593,9 +610,9 @@ function loadSelectedFromStorage() {
 let warningTimeout = null;
 function showTemporaryWarning(msg, duration = 3000) {
     const original = totalDiv.innerHTML;
-    totalDiv.style.backgroundColor = "#ffe6e6";
-    totalDiv.style.borderColor = "#cc0000";
-    totalDiv.style.color = "#cc0000";
+    totalDiv.style.backgroundColor = "#ffe6e6";  // light red
+    totalDiv.style.borderColor = "#cc0000";      // dark red border
+    totalDiv.style.color = "#cc0000";            // red text
     totalDiv.innerHTML = `<strong>${escapeHtml(msg)}</strong>`;
     if (warningTimeout) clearTimeout(warningTimeout);
     warningTimeout = setTimeout(() => {
@@ -618,31 +635,6 @@ function updateTotalColor(total) {
 
 function escapeHtml(text) {
     return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-}
-
-// ===== SMART SUGGESTION BADGES =====
-function updateSmartSuggestions() {
-    const totalUsed = computeSelectedTotal();
-    const remaining = totalLimit - totalUsed;
-    games.forEach((game, index) => {
-        const row = document.getElementById(`cb-${index}`)?.closest('tr');
-        if (!row) return;
-        let badge = row.querySelector('.fitBadge');
-        if (!badge) {
-            badge = document.createElement('span');
-            badge.className = 'fitBadge';
-            badge.style.marginLeft = '8px';
-            badge.style.fontSize = '12px';
-            row.querySelector('td.titleCell').appendChild(badge);
-        }
-        if (game.size <= remaining) {
-            badge.textContent = '✅ Can Fit!';
-            badge.style.color = 'green';
-        } else {
-            badge.textContent = '⚠️ Too Big';
-            badge.style.color = 'red';
-        }
-    });
 }
 
 (function init() {
