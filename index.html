@@ -8,140 +8,58 @@
 <meta name="description" content="PC game list selector for 500GB (450GB usable) external HDD. Add games to your selection until the 450GB limit.">
 <link rel="icon" href="data:,">
 <style>
-    /* Reset and basic */
     * { box-sizing: border-box; margin:0; padding:0; }
-    body {
-        font-family:'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color:#f9f9fb;
-        color:#1f2937;
-        line-height:1.5;
-    }
+    body { font-family:'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color:#f9f9fb; color:#1f2937; line-height:1.5; }
 
-    /* Header */
-    .siteHeader {
-        display:flex; justify-content:space-between; align-items:center;
-        padding:16px 24px;
-        background-color:#1e3a8a;
-        color:#fff;
-        box-shadow:0 2px 8px rgba(0,0,0,0.1);
-    }
-    .siteTitle {
-        display:flex; align-items:center; gap:12px; font-size:22px; font-weight:700;
-    }
-    .ownerBadge {
-        background:rgba(255,255,255,0.15);
-        padding:6px 12px; border-radius:999px;
-        font-size:13px;
-        font-weight:500;
-    }
+    .siteHeader { display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background-color:#1e3a8a; color:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+    .siteTitle { display:flex; align-items:center; gap:12px; font-size:22px; font-weight:700; }
+    .ownerBadge { background:rgba(255,255,255,0.15); padding:6px 12px; border-radius:999px; font-size:13px; font-weight:500; }
 
-    /* Top Panel */
-    #topPanel {
-        position:sticky; top:0; z-index:99;
-        padding:16px 24px; background:#fff;
-        box-shadow:0 2px 6px rgba(0,0,0,0.06);
-        display:flex; flex-direction:column; gap:14px;
-    }
-    #searchBar {
-        width:100%; padding:12px 16px; font-size:16px;
-        border:1px solid #cbd5e1; border-radius:8px;
-        transition:0.2s;
-    }
+    #topPanel { position:sticky; top:0; z-index:99; padding:16px 24px; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.06); display:flex; flex-direction:column; gap:14px; }
+    #searchBar { width:100%; padding:12px 16px; font-size:16px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s; }
     #searchBar:focus { outline:none; border-color:#1e3a8a; box-shadow:0 0 8px rgba(30,58,138,0.25); }
 
-    .infoRow {
-        display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; align-items:center;
-    }
-    .total, .counter {
-        flex:1 1 45%; min-width:140px;
-        padding:10px 16px; border-radius:8px; font-weight:600;
-        background:#f3f4f6; color:#1f2937;
-        border:1px solid #cbd5e1;
-        text-align:center;
-        transition:all 0.3s;
-    }
-
-    #toggleList {
-        flex:1 1 45%; min-width:160px;
-        padding:12px 20px; font-weight:600;
-        border:none; border-radius:8px;
-        cursor:pointer; color:#fff;
-        background:linear-gradient(135deg,#1e3a8a,#3b82f6);
-        display:flex; align-items:center; justify-content:center; gap:6px;
-        box-shadow:0 4px 8px rgba(0,0,0,0.08); transition:all 0.25s ease;
-    }
-    #toggleList:hover {
-        transform:translateY(-2px);
-        background:linear-gradient(135deg,#3b82f6,#1e3a8a);
-        box-shadow:0 6px 12px rgba(0,0,0,0.12);
-    }
+    .infoRow { display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; align-items:center; }
+    .total, .counter { flex:1 1 45%; min-width:140px; padding:10px 16px; border-radius:8px; font-weight:600; background:#f3f4f6; color:#1f2937; border:1px solid #cbd5e1; text-align:center; transition:all 0.3s; }
+    #toggleList { flex:1 1 45%; min-width:160px; padding:12px 20px; font-weight:600; border:none; border-radius:8px; cursor:pointer; color:#fff; background:linear-gradient(135deg,#1e3a8a,#3b82f6); display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 8px rgba(0,0,0,0.08); transition:all 0.25s ease; }
+    #toggleList:hover { transform:translateY(-2px); background:linear-gradient(135deg,#3b82f6,#1e3a8a); box-shadow:0 6px 12px rgba(0,0,0,0.12); }
     #toggleList .arrow { transition:transform 0.25s ease; }
     #toggleList[aria-expanded="true"] .arrow { transform:rotate(180deg); }
 
-    /* Selected Games Panel */
-    .selectedGames {
-        display:none; flex-direction:column; gap:10px;
-        padding:12px; border-radius:8px;
-        border:1px solid #cbd5e1; background:#f9fafb;
-        max-height:70vh; overflow-y:auto;
-    }
+    .selectedGames { display:none; flex-direction:column; gap:10px; padding:12px; border-radius:8px; border:1px solid #cbd5e1; background:#f9fafb; max-height:70vh; overflow-y:auto; }
     .selectedGames ul { list-style:none; width:100%; padding-left:0; }
-    .selectedGames li {
-        display:flex; justify-content:space-between; align-items:center;
-        padding:8px 10px; border-bottom:1px solid #e5e7eb;
-        font-size:14px; gap:8px;
-    }
+    .selectedGames li { display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:14px; gap:8px; }
     .selectedGames li .meta { font-size:13px; color:#6b7280; }
-    .selectedGames button.removeBtn, .clearAllBtn {
-        background-color:#ef4444; color:#fff; border:none; border-radius:6px;
-        padding:6px 12px; font-size:12px; font-weight:600;
-        cursor:pointer; transition:all 0.2s;
-    }
-    .selectedGames button.removeBtn:hover, .clearAllBtn:hover {
-        background-color:#b91c1c; transform:translateY(-1px);
-    }
+    .selectedGames button.removeBtn, .clearAllBtn { background-color:#ef4444; color:#fff; border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+    .selectedGames button.removeBtn:hover, .clearAllBtn:hover { background-color:#b91c1c; transform:translateY(-1px); }
     .clearAllBtn { display:none; width:fit-content; margin-top:8px; }
-
     .smallNote { font-size:12px; color:#6b7280; margin-top:4px; }
 
-    /* Table */
-    table {
-        width:100%; border-collapse:collapse; margin-top:18px;
-        border-radius:8px; overflow:hidden;
-        background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.05);
-    }
-    th, td {
-        padding:12px 16px; text-align:center;
-        border-bottom:1px solid #e5e7eb; border-right:1px solid #e5e7eb;
-        vertical-align:middle;
-    }
+    table { width:100%; border-collapse:collapse; margin-top:18px; border-radius:8px; overflow:hidden; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
+    th, td { padding:12px 16px; text-align:center; border-bottom:1px solid #e5e7eb; border-right:1px solid #e5e7eb; vertical-align:middle; }
     th:last-child, td:last-child { border-right:none; }
-    th {
-        background:#1e3a8a; color:#fff; font-weight:600; cursor:pointer;
-    }
+    th { background:#1e3a8a; color:#fff; font-weight:600; cursor:pointer; }
     th .sortArrow { margin-left:6px; font-size:12px; transition:transform 0.2s; }
     tr:hover { background:#f3f4f6; }
-
     input[type="checkbox"] { transform:scale(1.2); cursor:pointer; }
     td.titleCell { text-align:left; font-weight:600; color:#1e3a8a; }
 
-    /* Footer */
-    footer {
-        margin-top:20px; padding:16px 24px;
-        display:flex; justify-content:space-between; align-items:center;
-        flex-wrap:wrap; gap:10px;
-        background:#f3f4f6; border-top:1px solid #e5e7eb;
-    }
+    footer { margin-top:20px; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:#f3f4f6; border-top:1px solid #e5e7eb; }
     .ownerRight { font-size:13px; color:#1f2937; font-weight:500; }
     .copyright { font-size:13px; color:#6b7280; }
 
-    /* Responsive */
     @media(max-width:768px){
         #topPanel .infoRow { flex-direction:column; gap:8px; }
         .total, .counter, #toggleList { flex:1 1 100%; }
         th, td { padding:10px; font-size:14px; }
         .siteTitle { font-size:18px; gap:8px; }
     }
+
+    /* Scroll Buttons */
+    .scrollBtn { position:fixed; right:20px; padding:10px 14px; border:none; border-radius:50%; background:#1e3a8a; color:#fff; font-size:18px; cursor:pointer; box-shadow:0 4px 8px rgba(0,0,0,0.15); display:none; z-index:999; transition:all 0.3s; }
+    .scrollBtn:hover { background:#3b82f6; transform:translateY(-2px); }
+    #scrollTopBtn { bottom:80px; }
+    #scrollBottomBtn { bottom:20px; }
 </style>
 </head>
 <body>
@@ -191,11 +109,14 @@
     </footer>
 </main>
 
+<button class="scrollBtn" id="scrollTopBtn" title="Scroll to Top">↑</button>
+<button class="scrollBtn" id="scrollBottomBtn" title="Scroll to Bottom">↓</button>
 <script>
 const OWNER_NAME = "Jay Pee";
 const totalLimit = 450;
 let sortConfig = { key:null, ascending:true };
 
+// Games array (paste all your previous game objects here)
 const games = [
 {title:"A Quiet Place: The Road Ahead (2024)", size:38},
 {title:"A Way Out", size:22},
@@ -449,6 +370,7 @@ const searchBar = document.getElementById("searchBar");
 document.getElementById("year").textContent = new Date().getFullYear();
 document.getElementById("ownerBadge").textContent = `Owned by ${OWNER_NAME}`;
 
+// Render Table
 function renderTable(filter=""){
     tableBody.innerHTML="";
     let displayGames = games.map((g,i)=>({...g,index:i}));
@@ -553,10 +475,32 @@ document.querySelectorAll('th[data-sort]').forEach(th=>{
     });
 });
 
-(function init(){
-    selectedGames=[...new Set(selectedGames.filter(i=>i>=0 && i<games.length))];
-    renderTable();
-})();
+(function init(){ selectedGames=[...new Set(selectedGames.filter(i=>i>=0 && i<games.length))]; renderTable(); })();
+
+// SCROLL BUTTONS
+const scrollTopBtn = document.getElementById("scrollTopBtn");
+const scrollBottomBtn = document.getElementById("scrollBottomBtn");
+
+window.addEventListener("scroll", toggleScrollButtons);
+
+function toggleScrollButtons() {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    const tableTop = tableBody.offsetTop;
+    const tableBottom = tableTop + tableBody.offsetHeight - window.innerHeight;
+    scrollTopBtn.style.display = scrollY > tableTop + 100 ? "block" : "none";
+    scrollBottomBtn.style.display = scrollY < tableBottom - 100 ? "block" : "none";
+}
+
+scrollTopBtn.addEventListener("click", () => {
+    window.scrollTo({ top:0, behavior:"smooth" });
+    scrollTopBtn.style.display="none";
+});
+scrollBottomBtn.addEventListener("click", () => {
+    window.scrollTo({ top:document.body.scrollHeight, behavior:"smooth" });
+    scrollBottomBtn.style.display="none";
+});
+
+toggleScrollButtons();
 </script>
 </body>
 </html>
