@@ -73,7 +73,7 @@
         gap: 10px;
     }
     .total, .counter {
-        background-color: #e9fff1; /* light green start */
+        background-color: #e9fff1;
         padding: 10px 15px;
         border-radius: 8px;
         font-weight: 600;
@@ -84,8 +84,6 @@
         min-width: 120px;
         transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
     }
-
-    /* ===== Show Selected Games button with arrow ===== */
     #toggleList {
         background: linear-gradient(135deg, #0d3b66, #073763);
         color: #fff;
@@ -116,7 +114,6 @@
     #toggleList[aria-expanded="true"] .arrow {
         transform: rotate(180deg);
     }
-
     .selectedGames {
         display: none;
         flex-direction: column;
@@ -140,11 +137,9 @@
         gap: 8px;
     }
     .selectedGames li .meta { color:#4b6b88; font-size:13px; }
-
-    /* ===== Remove & Clear All Buttons ===== */
     .selectedGames button.removeBtn,
     .clearAllBtn {
-        background-color: #e53935; /* red */
+        background-color: #e53935;
         color: #fff;
         border: none;
         border-radius: 6px;
@@ -161,13 +156,7 @@
         transform: translateY(-1px);
         box-shadow: 0 3px 6px rgba(0,0,0,0.15);
     }
-    .clearAllBtn {
-        margin-top: 10px;
-        display: none;
-        text-align: center;
-        width: fit-content;
-    }
-
+    .clearAllBtn { margin-top: 10px; display: none; text-align: center; width: fit-content; }
     table {
         width: 100%;
         border-collapse: collapse;
@@ -185,7 +174,8 @@
         vertical-align: middle;
     }
     th:last-child, td:last-child { border-right: none; }
-    th { background-color: #0d3b66; color: #ffffff; font-weight: 700; }
+    th { background-color: #0d3b66; color: #ffffff; font-weight: 700; cursor: pointer; user-select: none; }
+    th .sortArrow { margin-left: 6px; font-size: 12px; transition: transform 0.2s ease; }
     tr:hover { background-color: #dbe9f4; }
     input[type="checkbox"] { transform: scale(1.14); cursor: pointer; }
     td.titleCell { text-align: left; font-weight:600; color:#073763; }
@@ -248,8 +238,8 @@
         <thead>
             <tr>
                 <th scope="col">Select</th>
-                <th scope="col">Game Title</th>
-                <th scope="col">Size (GB)</th>
+                <th scope="col" data-sort="title">Game Title <span class="sortArrow">⇅</span></th>
+                <th scope="col" data-sort="size">Size (GB) <span class="sortArrow">⇅</span></th>
             </tr>
         </thead>
         <tbody id="gameTable"></tbody>
@@ -264,6 +254,7 @@
 <script>
 const OWNER_NAME = "Jay Pee";
 const totalLimit = 450;
+let sortConfig = { key: null, ascending: true };
 const games = [
 {title:"A Quiet Place: The Road Ahead (2024)", size:38},
 {title:"A Way Out", size:22},
@@ -519,10 +510,26 @@ document.getElementById("ownerBadge").textContent = `Owned by ${OWNER_NAME}`;
 
 function renderTable(filter = "") {
     tableBody.innerHTML = "";
-    games.forEach((game, index) => {
-        if (filter && !game.title.toLowerCase().includes(filter)) return;
+
+    let displayGames = games.map((g, idx) => ({...g, index: idx}));
+
+    // Apply filter
+    if(filter) displayGames = displayGames.filter(g => g.title.toLowerCase().includes(filter));
+
+    // Apply sorting
+    if(sortConfig.key) {
+        displayGames.sort((a,b) => {
+            let valA = a[sortConfig.key], valB = b[sortConfig.key];
+            if(sortConfig.key === "title") {
+                valA = valA.toLowerCase(); valB = valB.toLowerCase();
+            }
+            return sortConfig.ascending ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+        });
+    }
+
+    displayGames.forEach(game => {
         const tr = document.createElement("tr");
-        const checkboxId = `cb-${index}`;
+        const checkboxId = `cb-${game.index}`;
         tr.innerHTML = `
             <td><input id="${checkboxId}" type="checkbox" /></td>
             <td class="titleCell">${escapeHtml(game.title)}</td>
@@ -530,8 +537,8 @@ function renderTable(filter = "") {
         `;
         tableBody.appendChild(tr);
         const cb = tr.querySelector("input");
-        cb.checked = selectedGames.includes(index);
-        cb.addEventListener("change", () => onToggleRequest(index, cb));
+        cb.checked = selectedGames.includes(game.index);
+        cb.addEventListener("change", () => onToggleRequest(game.index, cb));
     });
     updateSelectedGamesUI();
 }
@@ -541,7 +548,7 @@ function onToggleRequest(index, checkboxEl) {
     const size = Number(games[index].size);
     if (checkboxEl.checked) {
         if (total + size > totalLimit) {
-            showTemporaryWarning(`⚠️ Exceeds 450GB limit! Select a smaller games.`);
+            showTemporaryWarning(`⚠️ Exceeds 450GB limit! Select a smaller game.`);
             checkboxEl.checked = false;
             return;
         }
@@ -553,17 +560,8 @@ function onToggleRequest(index, checkboxEl) {
     updateSelectedGamesUI();
 }
 
-function removeGame(index) {
-    selectedGames = selectedGames.filter(i => i !== index);
-    saveSelectedToStorage();
-    renderTable(searchBar.value.trim().toLowerCase());
-}
-
-function clearAllGames() {
-    selectedGames = [];
-    saveSelectedToStorage();
-    renderTable(searchBar.value.trim().toLowerCase());
-}
+function removeGame(index) { selectedGames = selectedGames.filter(i => i !== index); saveSelectedToStorage(); renderTable(searchBar.value.trim().toLowerCase()); }
+function clearAllGames() { selectedGames = []; saveSelectedToStorage(); renderTable(searchBar.value.trim().toLowerCase()); }
 
 function updateSelectedGamesUI() {
     selectedGamesList.innerHTML = "";
@@ -571,8 +569,7 @@ function updateSelectedGamesUI() {
     totalDiv.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
     selectedGames.forEach(i => {
         const li = document.createElement("li");
-        li.innerHTML = `
-            <span style="flex:1 1 auto;">📌 ${escapeHtml(games[i].title)}</span>
+        li.innerHTML = `<span style="flex:1 1 auto;">📌 ${escapeHtml(games[i].title)}</span>
             <span class="meta">${games[i].size.toFixed(2)} GB</span>
             <button class="removeBtn">Remove</button>`;
         li.querySelector(".removeBtn").addEventListener("click", () => removeGame(i));
@@ -583,11 +580,8 @@ function updateSelectedGamesUI() {
     updateTotalColor(total);
 }
 
-function computeSelectedTotal() {
-    return selectedGames.reduce((sum, i) => sum + (games[i].size || 0), 0);
-}
+function computeSelectedTotal() { return selectedGames.reduce((sum, i) => sum + (games[i].size || 0), 0); }
 
-// Toggle list with arrow rotation
 toggleButton.addEventListener("click", () => {
     const isHidden = selectedGamesDiv.style.display === "none" || selectedGamesDiv.style.display === "";
     selectedGamesDiv.style.display = isHidden ? "flex" : "none";
@@ -598,32 +592,23 @@ toggleButton.addEventListener("click", () => {
 searchBar.addEventListener("input", () => renderTable(searchBar.value.trim().toLowerCase()));
 clearAllBtn.addEventListener("click", () => { if (confirm("Clear all selected games?")) clearAllGames(); });
 
-function saveSelectedToStorage() {
-    localStorage.setItem("pg_selected_v1", JSON.stringify(selectedGames));
-}
-function loadSelectedFromStorage() {
-    const d = localStorage.getItem("pg_selected_v1");
-    if (!d) return [];
-    try { const arr = JSON.parse(d); return Array.isArray(arr) ? arr : []; } catch { return []; }
-}
+function saveSelectedToStorage() { localStorage.setItem("pg_selected_v1", JSON.stringify(selectedGames)); }
+function loadSelectedFromStorage() { const d = localStorage.getItem("pg_selected_v1"); try { return d ? JSON.parse(d) : [] } catch { return [] } }
 
 let warningTimeout = null;
 function showTemporaryWarning(msg, duration = 3000) {
     const original = totalDiv.innerHTML;
-    totalDiv.style.backgroundColor = "#ffe6e6";  // light red
-    totalDiv.style.borderColor = "#cc0000";      // dark red border
-    totalDiv.style.color = "#cc0000";            // red text
+    totalDiv.style.backgroundColor = "#ffe6e6";  
+    totalDiv.style.borderColor = "#cc0000";      
+    totalDiv.style.color = "#cc0000";            
     totalDiv.innerHTML = `<strong>${escapeHtml(msg)}</strong>`;
     if (warningTimeout) clearTimeout(warningTimeout);
-    warningTimeout = setTimeout(() => {
-        updateSelectedGamesUI();
-        warningTimeout = null;
-    }, duration);
+    warningTimeout = setTimeout(() => { updateSelectedGamesUI(); warningTimeout = null; }, duration);
 }
 
 function updateTotalColor(total) {
     const ratio = total / totalLimit;
-    let color = "#e9fff1"; // default light green
+    let color = "#e9fff1";
     if (ratio < 0.5) color = "#b7f0b1";
     else if (ratio < 0.75) color = "#fff7b0";
     else if (ratio < 0.9) color = "#ffd59e";
@@ -633,9 +618,18 @@ function updateTotalColor(total) {
     totalDiv.style.color = "#0d3b66";
 }
 
-function escapeHtml(text) {
-    return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-}
+function escapeHtml(text) { return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+document.querySelectorAll('th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+        const key = th.getAttribute('data-sort');
+        if(sortConfig.key === key) sortConfig.ascending = !sortConfig.ascending;
+        else { sortConfig.key = key; sortConfig.ascending = true; }
+        document.querySelectorAll('.sortArrow').forEach(a => a.textContent = '⇅');
+        th.querySelector('.sortArrow').textContent = sortConfig.ascending ? '↑' : '↓';
+        renderTable(searchBar.value.trim().toLowerCase());
+    });
+});
 
 (function init() {
     selectedGames = [...new Set(selectedGames.filter(i => i >= 0 && i < games.length))];
