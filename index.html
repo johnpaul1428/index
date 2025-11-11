@@ -1,35 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PC GAME List</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PC GAME List — Owned by Jay Pee</title>
+<meta name="author" content="Jay Pee" />
+<meta name="description" content="PC game list selector for 500GB (450GB usable) external HDD. Add games to your selection until the 450GB limit." />
+<link rel="icon" href="data:,"> <!-- placeholder favicon; replace with your favicon file -->
 <style>
     /* ===== Reset & Base Styles ===== */
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         background-color: #ffffff;
         color: #0d3b66;
         padding: 0;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     /* ===== Header ===== */
-    h1 {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 15px 10px;
-        background-color: #0d3b66;
-        color: #ffffff;
-        font-size: 28px;
-        border-bottom: 2px solid #073763;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    .siteHeader {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding: 14px 18px;
+        background: linear-gradient(90deg,#0d3b66,#073763);
+        color: #fff;
+        border-bottom: 2px solid rgba(0,0,0,0.08);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .siteTitle {
+        display:flex;
+        align-items:center;
+        gap:12px;
+        font-size:20px;
+        font-weight:700;
+    }
+    .ownerBadge {
+        background: rgba(255,255,255,0.12);
+        color: #fff;
+        padding:6px 10px;
+        border-radius: 999px;
+        font-size:12px;
+        border: 1px solid rgba(255,255,255,0.08);
     }
 
     /* ===== Sticky Top Panel ===== */
@@ -38,8 +52,8 @@
         top: 0;
         background-color: #f0f4f8;
         z-index: 999;
-        padding: 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 12px 16px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -51,12 +65,12 @@
         font-size: 16px;
         border: 1.5px solid #0d3b66;
         border-radius: 8px;
-        transition: 0.3s;
+        transition: 0.18s;
     }
     #searchBar:focus {
         border-color: #073763;
         outline: none;
-        box-shadow: 0 0 5px rgba(13,59,102,0.5);
+        box-shadow: 0 0 6px rgba(13,59,102,0.28);
     }
 
     .infoRow {
@@ -86,13 +100,11 @@
         border-radius: 5px;
         cursor: pointer;
         padding: 10px 15px;
-        transition: 0.3s;
+        transition: 0.2s;
         flex: 1 1 45%;
         min-width: 120px;
     }
-    #toggleList:hover {
-        background-color: #073763;
-    }
+    #toggleList:hover { background-color: #073763; }
 
     .selectedGames {
         display: none;
@@ -106,20 +118,17 @@
         border: 1.5px solid #0d3b66;
         align-items: center;
     }
-    .selectedGames ul {
-        list-style: none;
-        padding-left: 0;
-        margin-top: 5px;
-        width: 100%;
-    }
+    .selectedGames ul { list-style: none; padding-left: 0; margin-top: 8px; width: 100%; }
     .selectedGames li {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 5px 0;
+        padding: 8px 6px;
         border-bottom: 1px solid #e1e5ea;
         font-size: 14px;
+        gap: 8px;
     }
+    .selectedGames li .meta { color:#4b6b88; font-size:13px; }
 
     .selectedGames button.removeBtn,
     .clearAllBtn {
@@ -128,14 +137,12 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        padding: 4px 8px;
+        padding: 6px 10px;
         font-size: 12px;
-        transition: 0.3s;
+        transition: 0.2s;
     }
     .selectedGames button.removeBtn:hover,
-    .clearAllBtn:hover {
-        background-color: #073763;
-    }
+    .clearAllBtn:hover { background-color: #073763; }
     .clearAllBtn {
         margin-top: 10px;
         display: none;
@@ -146,75 +153,104 @@
     table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 20px;
+        margin-top: 18px;
         background-color: #f0f4f8;
         border-radius: 8px;
         overflow: hidden;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.04);
     }
     th, td {
         padding: 12px 15px;
         text-align: center;
         border-bottom: 1px solid #e1e5ea;
         border-right: 1px solid #e1e5ea;
+        vertical-align: middle;
     }
-    th:last-child, td:last-child {
-        border-right: none;
+    th:last-child, td:last-child { border-right: none; }
+    th { background-color: #0d3b66; color: #ffffff; font-weight: 700; }
+    tr:hover { background-color: #dbe9f4; }
+    input[type="checkbox"] { transform: scale(1.14); cursor: pointer; }
+
+    td.titleCell { text-align: left; font-weight:600; color:#073763; }
+
+    .smallNote { font-size:12px; color:#4b6b88; margin-top:6px; }
+
+    /* ===== Footer ===== */
+    footer {
+        margin-top: 18px;
+        padding: 14px 16px;
+        background: linear-gradient(90deg,#f7f9fb,#eef3f8);
+        border-top: 1px solid #e6eef6;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:10px;
+        flex-wrap:wrap;
     }
-    th {
-        background-color: #0d3b66;
-        color: #ffffff;
-        font-weight: 600;
-    }
-    tr:hover {
-        background-color: #dbe9f4;
-    }
-    input[type="checkbox"] {
-        transform: scale(1.2);
-    }
+    .ownerRight { font-size:13px; color:#0d3b66; font-weight:600; }
+    .copyright { color:#4b6b88; font-size:13px; }
 
     /* ===== Responsive ===== */
     @media(max-width:768px){
-        #topPanel .infoRow {
-            flex-direction: column;
-            gap: 8px;
-        }
-        .total, .counter, #toggleList {
-            flex: 1 1 100%;
-        }
+        #topPanel .infoRow { flex-direction: column; gap: 8px; }
+        .total, .counter, #toggleList { flex: 1 1 100%; }
+        .siteTitle { font-size:16px; gap:8px; }
+        th, td { padding: 10px; font-size:14px; }
     }
 </style>
 </head>
 <body>
 
-<h1>PC GAME List</h1>
+<header class="siteHeader">
+    <div class="siteTitle">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="24" height="24" rx="4" fill="#fff" opacity="0.08"/>
+            <path d="M4 12h16" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M4 8h16" stroke="#fff" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+        </svg>
+        PC GAME List
+    </div>
+    <div class="ownerBadge" id="ownerBadge">Owned by Jay Pee</div>
+</header>
 
 <div id="topPanel">
-    <input type="text" id="searchBar" placeholder="Search for a game...">
+    <input type="text" id="searchBar" placeholder="Search for a game..." aria-label="Search games">
     <div class="infoRow">
-        <div class="total">Total Size: <span id="totalSize">0 / 450 GB</span></div>
+        <div class="total" id="totalDiv">Total Size: <span id="totalSize">0 / 450 GB</span></div>
         <div class="counter">Games Added: <span id="gameCount">0</span></div>
-        <button id="toggleList">Show Selected Games</button>
+        <button id="toggleList" aria-expanded="false">Show Selected Games</button>
     </div>
-    <div class="selectedGames" id="selectedGamesDiv">
+    <div class="selectedGames" id="selectedGamesDiv" aria-hidden="true">
         <strong>Selected Games:</strong>
         <ul id="selectedGamesList"></ul>
         <button class="clearAllBtn" id="clearAllBtn">Clear All</button>
+        <div class="smallNote">Selection is saved locally in your browser.</div>
     </div>
 </div>
 
-<table>
-    <thead>
-        <tr>
-            <th>Select</th>
-            <th>Game Title</th>
-            <th>Size (GB)</th>
-        </tr>
-    </thead>
-    <tbody id="gameTable"></tbody>
-</table>
+<main style="padding:16px;">
+    <table role="table" aria-label="Games list">
+        <thead>
+            <tr>
+                <th scope="col">Select</th>
+                <th scope="col">Game Title</th>
+                <th scope="col">Size (GB)</th>
+            </tr>
+        </thead>
+        <tbody id="gameTable"></tbody>
+    </table>
+
+    <footer>
+        <div class="copyright">© <span id="year"></span> Jay Pee — All rights reserved.</div>
+        <div class="ownerRight">Owner: <strong>Jay Pee</strong> · External HDD: <strong>500GB (450GB usable)</strong></div>
+    </footer>
+</main>
 
 <script>
+/* ========== Configuration & Data ========== */
+const OWNER_NAME = "Jay Pee";
+const totalLimit = 450; // usable capacity in GB
+
 const games = [
 {title:"A Quiet Place: The Road Ahead (2024)", size:38},
 {title:"A Way Out", size:22},
@@ -454,72 +490,101 @@ const games = [
 {title:"WWE 2K25 The Bloodline Edition Complete DLC", size:92}
 ];
 
+/* ========== State ========== */
+// selectedGames stores array of indices chosen
+let selectedGames = loadSelectedFromStorage();
+
+/* ========== DOM Refs ========== */
 const tableBody = document.getElementById("gameTable");
 const gameCount = document.getElementById("gameCount");
 const selectedGamesList = document.getElementById("selectedGamesList");
 const selectedGamesDiv = document.getElementById("selectedGamesDiv");
 const toggleButton = document.getElementById("toggleList");
 const clearAllBtn = document.getElementById("clearAllBtn");
-const totalLimit = 450;
+const totalDiv = document.getElementById("totalDiv");
+const totalSizeSpan = document.getElementById("totalSize");
+const searchBar = document.getElementById("searchBar");
+const ownerBadge = document.getElementById("ownerBadge");
+document.getElementById("year").textContent = new Date().getFullYear();
+ownerBadge.textContent = `Owned by ${OWNER_NAME}`;
 
-let selectedGames = [];
-
-function renderTable() {
+/* ========== Rendering ========== */
+function renderTable(filter = "") {
     tableBody.innerHTML = "";
     games.forEach((game, index) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td><input type="checkbox" onchange="toggleGame(${index}, this)" ${selectedGames.includes(index) ? "checked" : ""}></td>
-            <td style="text-align:left;">${game.title}</td>
-            <td>${game.size} GB</td>
+        const titleLower = game.title.toLowerCase();
+        if (filter && !titleLower.includes(filter)) return;
+
+        const tr = document.createElement("tr");
+
+        const checkboxId = `cb-${index}`;
+
+        tr.innerHTML = `
+            <td>
+                <input id="${checkboxId}" type="checkbox" aria-label="Select ${escapeHtml(game.title)}" />
+            </td>
+            <td class="titleCell">${escapeHtml(game.title)}</td>
+            <td>${Number(game.size).toFixed(2)} GB</td>
         `;
-        tableBody.appendChild(row);
+        tableBody.appendChild(tr);
+
+        const cb = tr.querySelector("input[type='checkbox']");
+        cb.checked = selectedGames.includes(index);
+        cb.addEventListener("change", () => onToggleRequest(index, cb));
     });
+    updateSelectedGamesUI();
 }
 
-function toggleGame(index, checkbox) {
-    if (checkbox.checked) selectedGames.push(index);
-    else selectedGames = selectedGames.filter(i => i !== index);
-    updateSelectedGames();
+/* When user tries to check/uncheck a game: prevent adding if it would exceed the limit */
+function onToggleRequest(index, checkboxEl) {
+    const currentlySelectedTotal = computeSelectedTotal();
+    const gameSize = Number(games[index].size) || 0;
+
+    if (checkboxEl.checked) {
+        // trying to add
+        if (currentlySelectedTotal + gameSize > totalLimit) {
+            // prevent and notify user
+            checkboxEl.checked = false;
+            // friendly inline warning
+            showTemporaryWarning(`Cannot add "${games[index].title}" — would exceed ${totalLimit} GB limit.`);
+            return;
+        } else {
+            // add
+            if (!selectedGames.includes(index)) selectedGames.push(index);
+        }
+    } else {
+        // remove
+        selectedGames = selectedGames.filter(i => i !== index);
+    }
+
+    saveSelectedToStorage();
+    updateSelectedGamesUI();
 }
 
+/* Remove via button in selected list */
 function removeGame(index) {
     selectedGames = selectedGames.filter(i => i !== index);
-    renderTable();
-    updateSelectedGames();
+    saveSelectedToStorage();
+    renderTable(searchBar.value.trim().toLowerCase());
 }
 
+/* Clear all */
 function clearAllGames() {
     selectedGames = [];
-    renderTable();
-    updateSelectedGames();
+    saveSelectedToStorage();
+    renderTable(searchBar.value.trim().toLowerCase());
 }
 
-function updateSelectedGames() {
-    let total = 0;
+/* Update selected games area and total */
+function updateSelectedGamesUI() {
     selectedGamesList.innerHTML = "";
-    clearAllBtn.style.display = selectedGames.length > 0 ? "inline-block" : "none";
+    const total = computeSelectedTotal();
 
-    selectedGames.forEach(i => {
-        total += games[i].size;
-        const li = document.createElement("li");
-        li.innerHTML = `📌 ${games[i].title}`;
-        const removeBtn = document.createElement("button");
-        removeBtn.textContent = "Remove";
-        removeBtn.className = "removeBtn";
-        removeBtn.onclick = () => removeGame(i);
-        li.appendChild(removeBtn);
-        selectedGamesList.appendChild(li);
-    });
-
-    gameCount.textContent = selectedGames.length;
-
-    const totalDiv = document.querySelector(".total");
     if (total > totalLimit) {
-        totalDiv.style.backgroundColor = "#ffcccc";
+        totalDiv.style.backgroundColor = "#ffefef";
         totalDiv.style.borderColor = "red";
         totalDiv.style.color = "red";
-        totalDiv.innerHTML = `⚠️ Over the 450GB limit!<br>Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
+        totalDiv.innerHTML = `⚠️ Over the ${totalLimit}GB limit!<br>Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
     } else {
         totalDiv.style.backgroundColor = "#ffffff";
         totalDiv.style.borderColor = "#0d3b66";
@@ -527,41 +592,136 @@ function updateSelectedGames() {
         totalDiv.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
     }
 
-    const checkboxes = tableBody.querySelectorAll("input[type='checkbox']");
-    if (total >= totalLimit) {
-        checkboxes.forEach((cb, i) => {
-            if (!cb.checked) cb.disabled = true;
-        });
-    } else {
-        checkboxes.forEach(cb => cb.disabled = false);
-    }
+    // populate selected list with remove buttons and sizes
+    selectedGames.forEach(i => {
+        const li = document.createElement("li");
+        const titleSpan = document.createElement("span");
+        titleSpan.innerHTML = `📌 ${escapeHtml(games[i].title)}`;
+        titleSpan.style.flex = "1 1 auto";
+        const meta = document.createElement("span");
+        meta.className = "meta";
+        meta.textContent = `${Number(games[i].size).toFixed(2)} GB`;
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "Remove";
+        removeBtn.className = "removeBtn";
+        removeBtn.addEventListener("click", () => removeGame(i));
+        li.appendChild(titleSpan);
+        li.appendChild(meta);
+        li.appendChild(removeBtn);
+        selectedGamesList.appendChild(li);
+    });
+
+    gameCount.textContent = selectedGames.length;
+    clearAllBtn.style.display = selectedGames.length > 0 ? "inline-block" : "none";
+
+    // Disable checkboxes for any game that would push you over when added:
+    // (This gives additional visual hint for very large remaining capacity)
+    const rows = tableBody.querySelectorAll("tr");
+    rows.forEach((row, rIndex) => {
+        const cb = row.querySelector("input[type='checkbox']");
+        if (!cb) return;
+        const globalIndex = getIndexFromRow(row);
+        if (globalIndex === null) return;
+        if (!cb.checked) {
+            const potential = total + Number(games[globalIndex].size);
+            cb.disabled = potential > totalLimit;
+        } else {
+            cb.disabled = false;
+        }
+    });
 }
 
+/* Helper: compute total size of selected set */
+function computeSelectedTotal() {
+    return selectedGames.reduce((acc, i) => acc + (Number(games[i].size) || 0), 0);
+}
+
+/* Toggle selected games panel open/close */
 toggleButton.addEventListener("click", () => {
-    if (selectedGamesDiv.style.display === "none") {
-        selectedGamesDiv.style.display = "flex";
-        toggleButton.textContent = "Hide Selected Games";
-    } else {
-        selectedGamesDiv.style.display = "none";
-        toggleButton.textContent = "Show Selected Games";
-    }
+    const isHidden = selectedGamesDiv.style.display === "none" || selectedGamesDiv.style.display === "";
+    selectedGamesDiv.style.display = isHidden ? "flex" : "none";
+    toggleButton.textContent = isHidden ? "Hide Selected Games" : "Show Selected Games";
+    toggleButton.setAttribute("aria-expanded", isHidden ? "true" : "false");
+    selectedGamesDiv.setAttribute("aria-hidden", isHidden ? "false" : "true");
 });
 
-clearAllBtn.addEventListener("click", clearAllGames);
-
-const searchBar = document.getElementById("searchBar");
-searchBar.addEventListener("keyup", function() {
-    const filter = this.value.toLowerCase();
-    const rows = tableBody.getElementsByTagName("tr");
-    for (let row of rows) {
-        const title = row.cells[1].textContent.toLowerCase();
-        row.style.display = title.includes(filter) ? "" : "none";
-    }
+/* Search filter */
+searchBar.addEventListener("input", function () {
+    const filter = this.value.trim().toLowerCase();
+    renderTable(filter);
 });
 
-renderTable();
-selectedGamesDiv.style.display = "none";
-clearAllBtn.style.display = "none";
+/* Clear all button */
+clearAllBtn.addEventListener("click", () => {
+    if (confirm("Clear all selected games?")) clearAllGames();
+});
+
+/* Local Storage helpers */
+function saveSelectedToStorage() {
+    try {
+        localStorage.setItem("pg_selected_v1", JSON.stringify(selectedGames));
+    } catch (err) {
+        console.warn("Could not save selection to localStorage", err);
+    }
+}
+function loadSelectedFromStorage() {
+    try {
+        const data = localStorage.getItem("pg_selected_v1");
+        if (!data) return [];
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) return parsed.filter(i => Number.isInteger(i) && i >= 0 && i < games.length);
+    } catch (err) { /* ignore parsing error */ }
+    return [];
+}
+
+/* Small utility to show a temporary inline warning at top */
+let warningTimeout = null;
+function showTemporaryWarning(msg, duration = 3000) {
+    // tiny ephemeral message in the totalDiv area
+    const original = totalDiv.innerHTML;
+    totalDiv.style.backgroundColor = "#fff4e5";
+    totalDiv.style.borderColor = "#f1b25a";
+    totalDiv.style.color = "#8a4b00";
+    totalDiv.innerHTML = `<strong>${escapeHtml(msg)}</strong><div style="font-size:12px;margin-top:6px;color:#4b6b88">Total limit: ${totalLimit} GB</div>`;
+    if (warningTimeout) clearTimeout(warningTimeout);
+    warningTimeout = setTimeout(() => {
+        updateSelectedGamesUI();
+        warningTimeout = null;
+    }, duration);
+}
+
+/* Utility: escape HTML for titles */
+function escapeHtml(text) {
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+/* Utility: get global games[] index from a table row by matching title text (used after filtering) */
+function getIndexFromRow(row) {
+    const titleCell = row.querySelector(".titleCell");
+    if (!titleCell) return null;
+    const titleText = titleCell.textContent.trim();
+    for (let i = 0; i < games.length; i++) {
+        if (games[i].title === titleText) return i;
+    }
+    return null;
+}
+
+/* Initialize UI */
+(function init() {
+    // ensure selectedGames contains only valid indices
+    selectedGames = Array.from(new Set(selectedGames.filter(i => Number.isInteger(i) && i >= 0 && i < games.length)));
+    renderTable();
+    // hide selected panel initially
+    selectedGamesDiv.style.display = "none";
+    clearAllBtn.style.display = selectedGames.length > 0 ? "inline-block" : "none";
+    // show owner in page title and header
+    document.title = `PC GAME List — Owned by ${OWNER_NAME}`;
+})();
 </script>
 
 </body>
