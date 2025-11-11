@@ -82,6 +82,7 @@
         text-align: center;
         flex: 1 1 45%;
         min-width: 120px;
+        transition: 0.3s;
     }
     #toggleList {
         background-color: #0d3b66;
@@ -512,8 +513,7 @@ function onToggleRequest(index, checkboxEl) {
 
     if (checkboxEl.checked) {
         if (currentlySelectedTotal + gameSize > totalLimit) {
-            // show warning instead of just blocking
-            showTemporaryWarning(`You have reached the 450GB limit. Choose smaller games instead.`);
+            showTemporaryWarning(`⚠️ Your selected games exceed the 450GB limit.`);
             checkboxEl.checked = false;
             return;
         } else {
@@ -542,7 +542,23 @@ function clearAllGames() {
 function updateSelectedGamesUI() {
     selectedGamesList.innerHTML = "";
     const total = computeSelectedTotal();
-    totalDiv.innerHTML = `Total Size: ${total.toFixed(2)} / ${totalLimit} GB`;
+    totalSizeSpan.textContent = `${total.toFixed(2)} / ${totalLimit} GB`;
+
+    // Update color: green -> yellow -> red
+    if (total / totalLimit < 0.7) {
+        totalDiv.style.color = "#0a9d58"; // green
+        totalDiv.style.borderColor = "#0a9d58";
+        totalDiv.style.backgroundColor = "#e6f4ea";
+    } else if (total / totalLimit < 1) {
+        totalDiv.style.color = "#b38f00"; // yellow
+        totalDiv.style.borderColor = "#b38f00";
+        totalDiv.style.backgroundColor = "#fff8e1";
+    } else {
+        totalDiv.style.color = "#d93025"; // red
+        totalDiv.style.borderColor = "#d93025";
+        totalDiv.style.backgroundColor = "#fdecea";
+    }
+
     selectedGames.forEach(i => {
         const li = document.createElement("li");
         const titleSpan = document.createElement("span");
@@ -599,9 +615,9 @@ function loadSelectedFromStorage() {
 let warningTimeout = null;
 function showTemporaryWarning(msg, duration = 3000) {
     const original = totalDiv.innerHTML;
-    totalDiv.style.backgroundColor = "#fff4e5";
-    totalDiv.style.borderColor = "#f1b25a";
-    totalDiv.style.color = "#8a4b00";
+    totalDiv.style.backgroundColor = "#fdecea";
+    totalDiv.style.borderColor = "#d93025";
+    totalDiv.style.color = "#d93025";
     totalDiv.innerHTML = `<strong>${escapeHtml(msg)}</strong>`;
     if (warningTimeout) clearTimeout(warningTimeout);
     warningTimeout = setTimeout(() => {
