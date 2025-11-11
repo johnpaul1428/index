@@ -541,7 +541,7 @@ function onToggleRequest(index, checkboxEl) {
     const size = Number(games[index].size);
     if (checkboxEl.checked) {
         if (total + size > totalLimit) {
-            showTemporaryWarning(`⚠️ Selected game exceeds 450GB limit! Please select a smaller game.`);
+            showTemporaryWarning(`⚠️ Exceeds 450GB limit! Select a smaller games.`);
             checkboxEl.checked = false;
             return;
         }
